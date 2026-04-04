@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
 
 const NotificationBell = () => {
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     { id: 1, text: "Welcome to VolunteerIQ Dashboard", time: "Just now", read: false }
   ]);
   const [showDropdown, setShowDropdown] = useState(false);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, User, Lock, Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, Mail, Loader2, CheckCircle2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginVolunteer } from '../utils/volunteerAuth';
 import { loginAdmin, saveSession } from '../utils/roleAuth';
