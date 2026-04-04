@@ -13,9 +13,7 @@ import ReportSubmission from './pages/ReportSubmission';
 import VolunteerRegistration from './pages/VolunteerRegistration';
 import VolunteerManagement from './pages/VolunteerManagement';
 import MatchingPanel from './pages/MatchingPanel';
-import ImpactMap from './pages/ImpactMap';
-import RoutePlanner from './pages/RoutePlanner';
-import AutoPlanner from './pages/AutoPlanner';
+import { seedDemoAccounts } from './utils/seedDemoAccounts';
 
 function App() {
   // Seed demo accounts on app startup
@@ -40,9 +38,6 @@ function App() {
             <Route path="/register" element={<VolunteerRegistration />} />
             <Route path="/volunteers" element={<VolunteerManagement />} />
             <Route path="/match/:reportId" element={<MatchingPanel />} />
-            <Route path="/impact-map" element={<ImpactMap />} />
-            <Route path="/route-planner" element={<RoutePlanner />} />
-            <Route path="/auto-planner" element={<AutoPlanner />} />
           </Routes>
         </main>
         <footer className="bg-white border-t border-slate-200 py-6 mt-12">

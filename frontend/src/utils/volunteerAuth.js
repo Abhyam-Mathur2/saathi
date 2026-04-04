@@ -1,5 +1,7 @@
 const USERS_KEY = 'saathi.users';
+const LEGACY_USERS_KEY = 'volunteerIQ.users';
 const SESSION_KEY = 'saathi.session';
+const LEGACY_SESSION_KEY = 'volunteerIQ.session';
 
 function readUsers() {
   const raw = localStorage.getItem(USERS_KEY) || localStorage.getItem(LEGACY_USERS_KEY);
