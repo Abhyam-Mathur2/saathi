@@ -49,11 +49,17 @@ app.use(errorHandler);
 // Database Connection & Server Start
 startServer();
 
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log('MongoDB connected successfully');
-    })
-    .catch(err => {
-        console.error('MongoDB connection error:', err);
-        console.warn('Backend is running without a MongoDB connection. Data routes may fail until MongoDB is available.');
-    });
+const mongoUri = process.env.MONGODB_URI;
+
+if (!mongoUri) {
+    console.warn('MONGODB_URI is not set. Running in local fallback mode without MongoDB.');
+} else {
+    mongoose.connect(mongoUri)
+        .then(() => {
+            console.log('MongoDB connected successfully');
+        })
+        .catch(err => {
+            console.error('MongoDB connection error:', err);
+            console.warn('Backend is running without a MongoDB connection. Data routes may fail until MongoDB is available.');
+        });
+}
