@@ -1,5 +1,5 @@
-const SESSION_KEY = 'volunteerIQ.activeSession';
-const CITIZEN_USERS_KEY = 'volunteerIQ.citizenUsers';
+const SESSION_KEY = 'saathi.activeSession';
+const CITIZEN_USERS_KEY = 'saathi.citizenUsers';
 
 function readSession() {
   const raw = localStorage.getItem(SESSION_KEY);
@@ -45,7 +45,7 @@ export function saveSession(role, profile) {
 }
 
 export function loginAdmin({ email, password }) {
-  const adminEmail = 'admin@volunteeriq.com';
+  const adminEmail = 'admin@saathi.com';
   const adminPassword = 'admin123';
 
   if (email.trim().toLowerCase() !== adminEmail || password !== adminPassword) {

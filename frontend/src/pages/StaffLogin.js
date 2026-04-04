@@ -68,7 +68,7 @@ const StaffLogin = () => {
             <input
               required
               type="email"
-              placeholder={role === 'admin' ? 'admin@volunteeriq.com' : 'Volunteer email'}
+              placeholder={role === 'admin' ? 'admin@saathi.com' : 'Volunteer email'}
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full pl-10 rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
@@ -89,7 +89,7 @@ const StaffLogin = () => {
 
           {role === 'admin' && (
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-              Demo admin credentials: admin@volunteeriq.com / admin123
+              Demo admin credentials: admin@saathi.com / admin123
             </div>
           )}
 

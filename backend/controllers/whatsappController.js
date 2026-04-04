@@ -114,7 +114,7 @@ exports.sendMessage = async (req, res) => {
     const response = await client.messages.create({
       from,
       to: toWhatsApp,
-      body: message || 'Hello from VolunteerIQ.',
+      body: message || 'Hello from Saathi.',
     });
 
     return res.status(200).json({

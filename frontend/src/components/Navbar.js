@@ -28,12 +28,17 @@ const Navbar = () => {
         { name: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Volunteers', path: '/volunteers', icon: Users },
         { name: 'Reports', path: '/report', icon: FileText },
+        { name: 'Impact Map', path: '/impact-map', icon: FileText },
+        { name: 'Auto Planner', path: '/auto-planner', icon: FileText },
+        { name: 'Route Planner', path: '/route-planner', icon: FileText },
       ]
     : session?.role === 'volunteer'
       ? [
           { name: 'Volunteer', path: '/volunteer', icon: HeartHandshake },
           { name: 'Reports', path: '/report', icon: FileText },
           { name: 'Directory', path: '/volunteers', icon: Users },
+          { name: 'Impact Map', path: '/impact-map', icon: FileText },
+          { name: 'Route Planner', path: '/route-planner', icon: FileText },
         ]
       : session?.role === 'citizen'
         ? [

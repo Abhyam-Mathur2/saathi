@@ -153,6 +153,19 @@ const ReportSubmission = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.description || !formData.description.trim()) {
+      toast.error('Description is required.');
+      return;
+    }
+    if (!formData.address || !formData.address.trim()) {
+      toast.error('Address is required.');
+      return;
+    }
+    if (ocrLoading) {
+      toast.error('Please wait for image processing to complete.');
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {

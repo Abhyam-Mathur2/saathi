@@ -35,7 +35,7 @@ const MatchingPanel = () => {
       setSendingTo(volunteer._id);
       await axios.post(apiUrl('/api/whatsapp/send'), {
         to: volunteer.phone,
-        message: `Hi ${volunteer.name || 'Volunteer'}, you have a new community task from VolunteerIQ.`,
+        message: `Hi ${volunteer.name || 'Volunteer'}, you have a new community task from Saathi.`,
       });
       toast.success(`WhatsApp message sent to ${volunteer.name}`);
     } catch (error) {

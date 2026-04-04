@@ -42,7 +42,7 @@ const VolunteerManagement = () => {
       setSendingTo(volunteer._id);
       await axios.post(apiUrl('/api/whatsapp/send'), {
         to: volunteer.phone,
-        message: `Hi ${volunteer.name || 'Volunteer'}, thank you for supporting VolunteerIQ.`,
+        message: `Hi ${volunteer.name || 'Volunteer'}, thank you for supporting Saathi.`,
       });
       toast.success(`Message sent to ${volunteer.name}`);
     } catch (error) {

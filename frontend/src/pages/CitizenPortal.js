@@ -43,7 +43,7 @@ const CitizenPortal = () => {
 
   const openChatbot = () => {
     window.dispatchEvent(
-      new CustomEvent('volunteeriq-open-chatbot', {
+      new CustomEvent('saathi-open-chatbot', {
         detail: { starterMessage: 'Help me report an issue in my area.' },
       })
     );
@@ -63,7 +63,7 @@ const CitizenPortal = () => {
       return;
     }
 
-    const messageText = `Hi ${session?.name || 'Citizen'}, your VolunteerIQ workspace is active. You can submit reports and track assistance updates here.`;
+    const messageText = `Hi ${session?.name || 'Citizen'}, your Saathi workspace is active. You can submit reports and track assistance updates here.`;
     const waNumber = normalizedTo.replace('+', '');
     const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(messageText)}`;
 

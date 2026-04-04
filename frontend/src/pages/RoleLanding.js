@@ -50,7 +50,7 @@ const RoleLanding = () => {
           Role-based access and chatbot support
         </div>
         <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-          VolunteerIQ for admins, volunteers, and citizens
+          Saathi for admins, volunteers, and citizens
         </h1>
         <p className="mt-4 text-lg text-slate-600">
           Pick your role to enter the right feature set. Citizens get reporting and chatbot help, volunteers get assignment tools, and admins get oversight.

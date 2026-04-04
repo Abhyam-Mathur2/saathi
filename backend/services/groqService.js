@@ -1,10 +1,19 @@
 const OpenAI = require('openai');
 require('dotenv').config();
 
-const client = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
-});
+let client;
+try {
+  if (!process.env.GROQ_API_KEY) {
+    console.warn('GROQ_API_KEY is missing in .env. AI features will use fallback mock data.');
+  } else {
+    client = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
+  }
+} catch (error) {
+  console.error('Failed to initialize OpenAI client:', error.message);
+}
 
 /**
  * Parses unstructured text into a structured JSON object.
@@ -12,6 +21,16 @@ const client = new OpenAI({
  * @returns {Promise<Object>} - Structured object: { location, issueType, urgency, description }
  */
 async function parseUnstructuredText(text) {
+  if (!client) {
+    return {
+      issueType: 'Other',
+      urgency: 5,
+      description: text,
+      location: { coordinates: [77.1025, 28.7041], address: 'Unknown' }, // Default to New Delhi
+      aiAnalysis: { reasoning: 'AI client not initialized, used fallback defaults.' }
+    };
+  }
+
   const prompt = `
     Analyze the following community need report and extract structured information into JSON format.
     Fields needed:
@@ -51,10 +70,14 @@ async function parseUnstructuredText(text) {
 }
 
 async function chatWithAssistant(messages = [], role = 'citizen', language = 'en') {
+  if (!client) {
+    return 'I could not generate a response right now as the AI service is not configured.';
+  }
+
   const roleInstructions = {
-    admin: 'You are the VolunteerIQ admin assistant. Focus on reports, volunteer management, statistics, and operational coordination.',
-    volunteer: 'You are the VolunteerIQ volunteer assistant. Focus on assigned tasks, matching, communication, availability, and clear action steps.',
-    citizen: 'You are the VolunteerIQ citizen assistant. Focus on reporting community needs, using the chatbot, and explaining what to do next in simple language.',
+    admin: 'You are the Saathi admin assistant. Focus on reports, volunteer management, statistics, and operational coordination.',
+    volunteer: 'You are the Saathi volunteer assistant. Focus on assigned tasks, matching, communication, availability, and clear action steps.',
+    citizen: 'You are the Saathi citizen assistant. Focus on reporting community needs, using the chatbot, and explaining what to do next in simple language.',
   };
 
   const languageInstructions = {
@@ -72,22 +95,48 @@ async function chatWithAssistant(messages = [], role = 'citizen', language = 'en
 
   const selectedLanguageInstruction = languageInstructions[language] || 'Respond in the same language as the user when possible.';
 
-  const response = await client.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
-    messages: [
-      {
-        role: 'system',
-        content: `${roleInstructions[role] || roleInstructions.citizen} ${selectedLanguageInstruction} Understand mixed-language input (English + local language) and keep replies concise, practical, and friendly.`,
-      },
-      ...messages,
-    ],
-    temperature: 0.4,
-  });
+  try {
+    const response = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'system',
+          content: `${roleInstructions[role] || roleInstructions.citizen} ${selectedLanguageInstruction} Understand mixed-language input (English + local language) and keep replies concise, practical, and friendly.`,
+        },
+        ...messages,
+      ],
+      temperature: 0.4,
+    });
 
-  return response.choices?.[0]?.message?.content?.trim() || 'I could not generate a response right now.';
+    return response.choices?.[0]?.message?.content?.trim() || 'I could not generate a response right now.';
+  } catch (error) {
+    console.error('Error in chatWithAssistant:', error);
+    return 'I am sorry, I am having trouble connecting to my brain right now.';
+  }
+}
+
+async function generateCompletion(prompt) {
+  if (!client) {
+    return { predictedUrgency: 5, crisisType: 'Unknown', reasoning: 'AI client not initialized.' };
+  }
+
+  try {
+    const response = await client.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.1,
+      response_format: { type: 'json_object' }
+    });
+
+    return response.choices?.[0]?.message?.content || '{}';
+  } catch (error) {
+    console.error('Error in generateCompletion:', error);
+    return '{}';
+  }
 }
 
 module.exports = {
   parseUnstructuredText,
   chatWithAssistant,
+  generateCompletion,
 };

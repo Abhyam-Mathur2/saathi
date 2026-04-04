@@ -1,6 +1,6 @@
-# VolunteerIQ – Smart Resource Allocation System
+# Saathi – Smart Resource Allocation System
 
-VolunteerIQ is a data-driven coordination system designed for NGOs and local organizations to efficiently manage community needs and allocate volunteers.
+Saathi is a data-driven coordination system designed for NGOs and local organizations to efficiently manage community needs and allocate volunteers.
 
 ## Features
 - **Multi-modal Data Collection**: Web forms, Voice-to-Text, and OCR-based document parsing.
@@ -20,7 +20,7 @@ VolunteerIQ is a data-driven coordination system designed for NGOs and local org
 ### 1. Clone & Init
 ```bash
 # Navigate to the project root
-cd volunteer-iq
+cd saathi
 ```
 
 ### 2. Backend Setup
