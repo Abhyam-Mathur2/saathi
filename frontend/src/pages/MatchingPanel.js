@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { User, MapPin, Award, Calendar, ChevronLeft, CheckCircle, ShieldCheck } from 'lucide-react';
-import UrgencyBadge from '../components/UrgencyBadge';
+import { User, MapPin, Award, Calendar, ChevronLeft, CheckCircle, ShieldCheck, MessageCircle } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import { apiUrl } from '../config/api';
 
 const MatchingPanel = () => {
   const { reportId } = useParams();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sendingTo, setSendingTo] = useState('');
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/reports/match/${reportId}`);
+        const response = await axios.get(apiUrl(`/api/reports/match/${reportId}`));
         setMatches(response.data.data);
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -27,6 +28,21 @@ const MatchingPanel = () => {
   const handleAssign = (volunteerName) => {
     toast.success(`Assignment simulated! Alert sent to ${volunteerName}`);
     console.log(`Alert sent to ${volunteerName}: Urgent task assigned.`);
+  };
+
+  const handleSendMessage = async (volunteer) => {
+    try {
+      setSendingTo(volunteer._id);
+      await axios.post(apiUrl('/api/whatsapp/send'), {
+        to: volunteer.phone,
+        message: `Hi ${volunteer.name || 'Volunteer'}, you have a new community task from VolunteerIQ.`,
+      });
+      toast.success(`WhatsApp message sent to ${volunteer.name}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send message');
+    } finally {
+      setSendingTo('');
+    }
   };
 
   if (loading) return (
@@ -119,13 +135,24 @@ const MatchingPanel = () => {
                    </div>
                 </div>
 
-                <button 
-                  onClick={() => handleAssign(match.volunteer.name)}
-                  className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${index === 0 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md shadow-primary-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  Assign Task
-                </button>
+                <div className="space-y-2">
+                  <button 
+                    onClick={() => handleAssign(match.volunteer.name)}
+                    className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${index === 0 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md shadow-primary-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Assign Task
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendMessage(match.volunteer)}
+                    disabled={sendingTo === match.volunteer._id}
+                    className="w-full py-3 rounded-xl font-bold text-sm border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    Send Message
+                  </button>
+                </div>
               </div>
             ))}
           </div>

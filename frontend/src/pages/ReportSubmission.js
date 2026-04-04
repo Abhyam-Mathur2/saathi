@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Mic, MicOff, Upload, Send, FileText, Loader2, MapPin, Smartphone } from 'lucide-react';
+import { Mic, MicOff, Upload, Send, FileText, Loader2, MapPin, Smartphone, X, LocateFixed } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { toast, Toaster } from 'react-hot-toast';
+import { apiUrl } from '../config/api';
 
 const ReportSubmission = () => {
   const [activeTab, setActiveTab] = useState('form'); // 'form' or 'whatsapp'
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [locationAccuracy, setLocationAccuracy] = useState(null);
+  const [selectedImageName, setSelectedImageName] = useState('');
   
   // Form State
   const [formData, setFormData] = useState({
@@ -17,11 +21,13 @@ const ReportSubmission = () => {
     urgency: 5,
     address: '',
     longitude: 77.1025,
-    latitude: 28.7041
+    latitude: 28.7041,
+    reportImage: ''
   });
 
   // WhatsApp Simulation State
   const [whatsappText, setWhatsappText] = useState('');
+  const [aiResponsePreview, setAiResponsePreview] = useState('');
 
   // Web Speech API Setup
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -54,19 +60,95 @@ const ReportSubmission = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be under 2MB.');
+      return;
+    }
+
+    const imageReader = new FileReader();
+    imageReader.onloadend = () => {
+      setFormData((prev) => ({ ...prev, reportImage: imageReader.result }));
+    };
+    imageReader.readAsDataURL(file);
+    setSelectedImageName(file.name);
+
     setOcrLoading(true);
     toast.loading('Extracting text from image...');
     try {
       const { data: { text } } = await Tesseract.recognize(file, 'eng');
-      setFormData({ ...formData, description: text });
+      setFormData((prev) => ({
+        ...prev,
+        description: text?.trim() ? text : prev.description,
+      }));
       toast.dismiss();
-      toast.success('Text extracted successfully!');
+      toast.success('Image attached and text extracted.');
     } catch (error) {
       console.error(error);
       toast.error('OCR failed. Please try again.');
     } finally {
       setOcrLoading(false);
     }
+  };
+
+  const removeAttachedImage = () => {
+    setFormData((prev) => ({ ...prev, reportImage: '' }));
+    setSelectedImageName('');
+  };
+
+  const fetchBrowserLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error('Geolocation is not supported in this browser.');
+      return;
+    }
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        let resolvedAddress = '';
+
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
+            {
+              headers: {
+                Accept: 'application/json',
+              },
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            const a = data.address || {};
+            const city = a.city || a.town || a.village || a.hamlet || a.county || '';
+            const state = a.state || '';
+            const country = a.country || '';
+            resolvedAddress = [city, state, country].filter(Boolean).join(', ');
+          }
+        } catch (error) {
+          // Fall back to coordinates when reverse lookup is unavailable.
+        }
+
+        setFormData((prev) => ({
+          ...prev,
+          latitude,
+          longitude,
+          address: resolvedAddress || `Lat ${latitude.toFixed(6)}, Lng ${longitude.toFixed(6)}`,
+        }));
+        setLocationAccuracy(Math.round(accuracy));
+        setLocating(false);
+        toast.success('Current location fetched from browser.');
+      },
+      () => {
+        setLocating(false);
+        toast.error('Unable to fetch location. Please allow location permission.');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -80,9 +162,10 @@ const ReportSubmission = () => {
           address: formData.address
         }
       };
-      await axios.post('http://localhost:5000/api/reports', payload);
+      await axios.post(apiUrl('/api/reports'), payload);
       toast.success('Report submitted successfully!');
-      setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041 });
+      setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041, reportImage: '' });
+      setSelectedImageName('');
     } catch (error) {
       toast.error('Submission failed.');
     } finally {
@@ -94,10 +177,11 @@ const ReportSubmission = () => {
     if (!whatsappText) return;
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/reports', {
+      const response = await axios.post(apiUrl('/api/reports'), {
         isUnstructured: true,
         text: whatsappText
       });
+      setAiResponsePreview(response.data.aiResponse || 'AI processed your message successfully.');
       toast.success('WhatsApp message parsed and saved!');
       setWhatsappText('');
     } catch (error) {
@@ -176,6 +260,21 @@ const ReportSubmission = () => {
                     className="w-full pl-10 rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={fetchBrowserLocation}
+                    disabled={locating}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 w-fit"
+                  >
+                    <LocateFixed className="w-4 h-4" />
+                    {locating ? 'Fetching location...' : 'Use My Current Location'}
+                  </button>
+                  <p className="text-xs text-slate-500">
+                    Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
+                    {locationAccuracy ? ` (${locationAccuracy}m accuracy)` : ''}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -203,6 +302,38 @@ const ReportSubmission = () => {
                   placeholder="Describe the community need in detail..."
                   className="w-full rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
                 ></textarea>
+
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-700">Upload Photo</p>
+                      <p className="text-xs text-slate-500">Attach an image of the issue (max 2MB). OCR will auto-extract text.</p>
+                    </div>
+                    <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-100 cursor-pointer w-fit">
+                      <Upload className="w-4 h-4" /> Choose Image
+                      <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
+                    </label>
+                  </div>
+                  {selectedImageName && (
+                    <p className="text-xs text-slate-600 mt-2">Selected: {selectedImageName}</p>
+                  )}
+                </div>
+
+                {formData.reportImage && (
+                  <div className="rounded-lg border border-slate-200 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Attached Image</p>
+                      <button
+                        type="button"
+                        onClick={removeAttachedImage}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"
+                      >
+                        <X className="w-3.5 h-3.5" /> Remove
+                      </button>
+                    </div>
+                    <img src={formData.reportImage} alt="Attached report" className="h-40 w-full object-cover rounded-md" />
+                  </div>
+                )}
               </div>
 
               <button 
@@ -238,6 +369,13 @@ const ReportSubmission = () => {
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 Process with AI
               </button>
+
+              {aiResponsePreview && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                  <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">AI Response</p>
+                  <p className="text-sm text-emerald-900">{aiResponsePreview}</p>
+                </div>
+              )}
             </div>
           )}
         </div>

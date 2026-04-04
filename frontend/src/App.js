@@ -1,9 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import RoleLanding from './pages/RoleLanding';
+import StaffLogin from './pages/StaffLogin';
+import CitizenLogin from './pages/CitizenLogin';
+import CitizenSignup from './pages/CitizenSignup';
+import AdminPortal from './pages/AdminPortal';
+import VolunteerPortal from './pages/VolunteerPortal';
+import CitizenPortal from './pages/CitizenPortal';
 import Dashboard from './pages/Dashboard';
 import ReportSubmission from './pages/ReportSubmission';
 import VolunteerRegistration from './pages/VolunteerRegistration';
+import VolunteerManagement from './pages/VolunteerManagement';
 import MatchingPanel from './pages/MatchingPanel';
 
 function App() {
@@ -13,9 +21,17 @@ function App() {
         <Navbar />
         <main className="flex-grow">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<RoleLanding />} />
+            <Route path="/login" element={<StaffLogin />} />
+            <Route path="/citizen/login" element={<CitizenLogin />} />
+            <Route path="/citizen/signup" element={<CitizenSignup />} />
+            <Route path="/admin" element={<AdminPortal />} />
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+            <Route path="/volunteer" element={<VolunteerPortal />} />
+            <Route path="/citizen" element={<CitizenPortal />} />
             <Route path="/report" element={<ReportSubmission />} />
             <Route path="/register" element={<VolunteerRegistration />} />
+            <Route path="/volunteers" element={<VolunteerManagement />} />
             <Route path="/match/:reportId" element={<MatchingPanel />} />
           </Routes>
         </main>

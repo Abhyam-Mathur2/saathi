@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  LineChart, Line, Cell, PieChart, Pie 
+  LineChart, Line, Cell 
 } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import UrgencyBadge from '../components/UrgencyBadge';
 import { Link } from 'react-router-dom';
+import { apiUrl } from '../config/api';
 
 // Fix Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -22,26 +23,26 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const Dashboard = () => {
-  const emptyStats = {
-    summary: {
-      totalReports: 0,
-      urgentReports: 0,
-      totalVolunteers: 0,
-      totalAssignments: 0,
-    },
-    categories: [],
-    reportsTrend: [],
-    topUrgent: [],
-  };
+const emptyStats = {
+  summary: {
+    totalReports: 0,
+    urgentReports: 0,
+    totalVolunteers: 0,
+    totalAssignments: 0,
+  },
+  categories: [],
+  reportsTrend: [],
+  topUrgent: [],
+};
 
+const Dashboard = () => {
   const [stats, setStats] = useState(emptyStats);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/dashboard/stats');
+        const response = await axios.get(apiUrl('/api/dashboard/stats'));
         setStats({
           ...emptyStats,
           ...response.data.data,
