@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { User, Phone, MapPin, Trash2, Search, Loader2, MessageCircle } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
 
 const VolunteerManagement = () => {
@@ -154,6 +155,7 @@ const VolunteerManagement = () => {
           <p className="text-slate-500 italic">No volunteers found matching your criteria.</p>
         </div>
       )}
+      <ChatbotWidget defaultRole="admin" />
     </div>
   );
 };

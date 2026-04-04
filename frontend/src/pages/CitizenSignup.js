@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, User, AtSign, Lock, Phone, MapPin, Loader2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { signupCitizenUser } from '../utils/roleAuth';
 
 const CitizenSignup = () => {
@@ -136,6 +137,7 @@ const CitizenSignup = () => {
           </Link>
         </p>
       </div>
+      <ChatbotWidget defaultRole="citizen" />
     </div>
   );
 };

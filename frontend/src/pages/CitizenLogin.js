@@ -79,7 +79,7 @@ const CitizenLogin = () => {
           </button>
 
           <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900">
-            <p className="font-semibold text-sm mb-3">📋 Demo Citizen Credentials:</p>
+            <p className="font-semibold text-sm mb-3">✅ Demo Citizen Credentials (Auto-seeded):</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200">
                 <div>

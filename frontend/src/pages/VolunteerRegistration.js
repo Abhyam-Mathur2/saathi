@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { User, Phone, Mail, MapPin, CheckCircle2, Loader2, Camera, X, LocateFixed, Lock } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { signupVolunteer } from '../utils/volunteerAuth';
 import { apiUrl } from '../config/api';
 
@@ -368,6 +369,7 @@ const VolunteerRegistration = () => {
           Register as Volunteer
         </button>
       </form>
+      <ChatbotWidget defaultRole="volunteer" />
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import RoleLanding from './pages/RoleLanding';
@@ -13,8 +13,13 @@ import ReportSubmission from './pages/ReportSubmission';
 import VolunteerRegistration from './pages/VolunteerRegistration';
 import VolunteerManagement from './pages/VolunteerManagement';
 import MatchingPanel from './pages/MatchingPanel';
+import { seedDemoAccounts } from './utils/seedDemoAccounts';
 
 function App() {
+  // Seed demo accounts on app startup
+  useEffect(() => {
+    seedDemoAccounts();
+  }, []);
   return (
     <Router>
       <div className="min-h-screen bg-slate-50 flex flex-col">

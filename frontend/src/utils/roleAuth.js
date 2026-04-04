@@ -109,6 +109,26 @@ export function loginCitizen({ username, password }) {
   const cleanUsername = String(username || '').trim().toLowerCase();
   const cleanPassword = String(password || '');
 
+  // Check hardcoded demo citizen accounts first (fallback)
+  const demoCitizens = [
+    { username: 'citizen_demo', password: 'Citizen@2026', name: 'Demo Citizen' },
+    { username: 'priya_demo', password: 'Citizen@2026', name: 'Priya Sharma' },
+  ];
+
+  const demoMatch = demoCitizens.find(
+    (demo) => demo.username === cleanUsername && demo.password === cleanPassword
+  );
+
+  if (demoMatch) {
+    return saveSession('citizen', {
+      id: `demo-citizen-${Date.now()}`,
+      name: demoMatch.name,
+      phone: '',
+      city: 'Demo',
+    });
+  }
+
+  // Then check localStorage for registered citizen accounts
   const users = readCitizenUsers();
   const user = users.find(
     (item) => item.username === cleanUsername && item.password === cleanPassword

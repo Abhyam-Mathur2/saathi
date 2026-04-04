@@ -97,7 +97,7 @@ const StaffLogin = () => {
 
           {role === 'admin' && (
             <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
-              <p className="font-semibold text-sm mb-3">📋 Demo Admin Credentials:</p>
+              <p className="font-semibold text-sm mb-3">� Demo Admin Credentials (Hardcoded):</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-amber-200">
                   <div>
@@ -139,7 +139,7 @@ const StaffLogin = () => {
 
           {role === 'volunteer' && (
             <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900">
-              <p className="font-semibold text-sm mb-3">📋 Demo Volunteer Credentials:</p>
+              <p className="font-semibold text-sm mb-3">✅ Demo Volunteer Credentials (Auto-seeded):</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
                   <div>

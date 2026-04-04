@@ -48,6 +48,32 @@ export function signupVolunteer({ name, email, phone, password }) {
 
 export function loginVolunteer({ email, password }) {
   const normalizedEmail = email.trim().toLowerCase();
+
+  // Check hardcoded demo volunteer accounts first (fallback for demo data)
+  const demoVolunteers = [
+    { email: 'john@saathi.com', password: 'Volunteer@2026', name: 'John Doe', phone: '9876543210' },
+    { email: 'sarah@saathi.com', password: 'Volunteer@2026', name: 'Sarah Smith', phone: '9876543211' },
+    { email: 'raj@saathi.com', password: 'Volunteer@2026', name: 'Raj Kumar', phone: '9876543212' },
+  ];
+
+  const demoMatch = demoVolunteers.find(
+    (demo) => demo.email === normalizedEmail && demo.password === password
+  );
+
+  if (demoMatch) {
+    const session = {
+      id: `demo-volunteer-${Date.now()}`,
+      name: demoMatch.name,
+      email: demoMatch.email,
+      phone: demoMatch.phone,
+      loginAt: new Date().toISOString(),
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    window.dispatchEvent(new Event('volunteer-auth-changed'));
+    return session;
+  }
+
+  // Then check localStorage for registered volunteers
   const users = readUsers();
 
   const user = users.find((u) => u.email === normalizedEmail && u.password === password);

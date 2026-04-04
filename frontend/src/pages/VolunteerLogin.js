@@ -79,7 +79,7 @@ const VolunteerLogin = () => {
           </button>
 
           <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900 mt-4">
-            <p className="font-semibold text-sm mb-3">📋 Demo Volunteer Credentials:</p>
+            <p className="font-semibold text-sm mb-3">✅ Demo Volunteer Credentials (Auto-seeded):</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
                 <div>

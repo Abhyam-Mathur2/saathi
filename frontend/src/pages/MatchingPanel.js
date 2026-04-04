@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { User, MapPin, Award, Calendar, ChevronLeft, CheckCircle, ShieldCheck, MessageCircle } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
 
 const MatchingPanel = () => {
@@ -162,6 +163,7 @@ const MatchingPanel = () => {
           </div>
         )}
       </div>
+      <ChatbotWidget defaultRole="admin" />
     </div>
   );
 };

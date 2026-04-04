@@ -12,6 +12,7 @@ import {
   AlertTriangle, MapPin, ChevronRight, LayoutDashboard 
 } from 'lucide-react';
 import UrgencyBadge from '../components/UrgencyBadge';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { Link } from 'react-router-dom';
 import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
@@ -220,6 +221,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <ChatbotWidget defaultRole="admin" />
     </div>
   );
 };
