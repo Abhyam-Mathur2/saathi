@@ -18,11 +18,20 @@ exports.createReport = async (req, res) => {
         let reportData = req.body;
         let aiResponse = null;
 
-        // If 'isUnstructured' is true, parse text with AI
         if (req.body.isUnstructured && req.body.text) {
             const aiData = await groqService.parseUnstructuredText(req.body.text);
             reportData = { ...reportData, ...aiData };
             aiResponse = buildAiResponse(aiData);
+        } else {
+            if (!reportData.description || !reportData.description.trim()) {
+                return res.status(400).json({ success: false, message: 'Description is required' });
+            }
+            if (!reportData.issueType) {
+                return res.status(400).json({ success: false, message: 'Issue type is required' });
+            }
+            if (!reportData.location || !reportData.location.coordinates || !reportData.location.address) {
+                return res.status(400).json({ success: false, message: 'Location with coordinates and address is required' });
+            }
         }
 
         const report = await localStore.createReport(reportData, Report);

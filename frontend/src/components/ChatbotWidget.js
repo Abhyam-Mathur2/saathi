@@ -44,10 +44,8 @@ const ChatbotWidget = ({ defaultRole }) => {
     };
 
     window.addEventListener('saathi-open-chatbot', handleExternalOpen);
-    window.addEventListener('volunteeriq-open-chatbot', handleExternalOpen);
     return () => {
       window.removeEventListener('saathi-open-chatbot', handleExternalOpen);
-      window.removeEventListener('volunteeriq-open-chatbot', handleExternalOpen);
     };
   }, []);
 
