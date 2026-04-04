@@ -40,7 +40,7 @@ app.use('/api/chatbot', chatbotRoutes);
 
 // Root route
 app.get('/', (req, res) => {
-    res.send('VolunteerIQ API is running...');
+    res.send('Saathi API is running...');
 });
 
 // Error handling

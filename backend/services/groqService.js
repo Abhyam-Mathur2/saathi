@@ -52,9 +52,9 @@ async function parseUnstructuredText(text) {
 
 async function chatWithAssistant(messages = [], role = 'citizen', language = 'en') {
   const roleInstructions = {
-    admin: 'You are the VolunteerIQ admin assistant. Focus on reports, volunteer management, statistics, and operational coordination.',
-    volunteer: 'You are the VolunteerIQ volunteer assistant. Focus on assigned tasks, matching, communication, availability, and clear action steps.',
-    citizen: 'You are the VolunteerIQ citizen assistant. Focus on reporting community needs, using the chatbot, and explaining what to do next in simple language.',
+    admin: 'You are the Saathi admin assistant. Focus on reports, volunteer management, statistics, and operational coordination.',
+    volunteer: 'You are the Saathi volunteer assistant. Focus on assigned tasks, matching, communication, availability, and clear action steps.',
+    citizen: 'You are the Saathi citizen assistant. Focus on reporting community needs, using the chatbot, and explaining what to do next in simple language.',
   };
 
   const languageInstructions = {

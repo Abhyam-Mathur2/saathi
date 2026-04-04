@@ -3,7 +3,7 @@ import { Bell } from 'lucide-react';
 
 const NotificationBell = () => {
   const [notifications] = useState([
-    { id: 1, text: "Welcome to VolunteerIQ Dashboard", time: "Just now", read: false }
+    { id: 1, text: "Welcome to Saathi Dashboard", time: "Just now", read: false }
   ]);
   const [showDropdown, setShowDropdown] = useState(false);
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Lock, Mail, Loader2, CheckCircle2 } from 'lucide-react';
+import { Shield, Lock, Mail, Loader2, CheckCircle2, HeartHandshake } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginVolunteer } from '../utils/volunteerAuth';
 import { loginAdmin, saveSession } from '../utils/roleAuth';
@@ -34,9 +34,9 @@ const StaffLogin = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-10">
+    <div className="min-h-[calc(100vh-8rem)] px-4 py-10 flex items-center justify-center">
       <Toaster position="top-right" />
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-primary-50 text-primary-600 mb-4">
             <Shield className="h-6 w-6" />
@@ -68,10 +68,10 @@ const StaffLogin = () => {
             <input
               required
               type="email"
-              placeholder={role === 'admin' ? 'admin@volunteeriq.com' : 'Volunteer email'}
+              placeholder={role === 'admin' ? 'admin@saathi.com' : 'Volunteer email'}
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full pl-10 rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
+              className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
 
@@ -80,23 +80,23 @@ const StaffLogin = () => {
             <input
               required
               type="password"
-              placeholder={role === 'admin' ? 'admin123' : 'Volunteer password'}
+              placeholder={role === 'admin' ? 'Saathi@Admin2026!' : 'Volunteer password'}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full pl-10 rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
+              className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
 
           {role === 'admin' && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-              Demo admin credentials: admin@volunteeriq.com / admin123
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              Demo admin credentials: admin@saathi.com / Saathi@Admin2026!
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-primary-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 disabled:opacity-50"
+            className="w-full h-12 bg-primary-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
             Login as {role}
@@ -108,6 +108,10 @@ const StaffLogin = () => {
           <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-700">
             Register here
           </Link>
+        </p>
+
+        <p className="mt-4 text-center text-sm text-slate-500">
+          Citizens can also become volunteers from the citizen workspace.
         </p>
       </div>
     </div>

@@ -1,8 +1,10 @@
-const SESSION_KEY = 'volunteerIQ.activeSession';
-const CITIZEN_USERS_KEY = 'volunteerIQ.citizenUsers';
+const SESSION_KEY = 'saathi.activeSession';
+const LEGACY_SESSION_KEY = 'volunteerIQ.activeSession';
+const CITIZEN_USERS_KEY = 'saathi.citizenUsers';
+const LEGACY_CITIZEN_USERS_KEY = 'volunteerIQ.citizenUsers';
 
 function readSession() {
-  const raw = localStorage.getItem(SESSION_KEY);
+  const raw = localStorage.getItem(SESSION_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
   return raw ? JSON.parse(raw) : null;
 }
 
@@ -12,7 +14,7 @@ function writeSession(session) {
 }
 
 function readCitizenUsers() {
-  const raw = localStorage.getItem(CITIZEN_USERS_KEY);
+  const raw = localStorage.getItem(CITIZEN_USERS_KEY) || localStorage.getItem(LEGACY_CITIZEN_USERS_KEY);
   return raw ? JSON.parse(raw) : [];
 }
 
@@ -45,8 +47,8 @@ export function saveSession(role, profile) {
 }
 
 export function loginAdmin({ email, password }) {
-  const adminEmail = 'admin@volunteeriq.com';
-  const adminPassword = 'admin123';
+  const adminEmail = 'admin@saathi.com';
+  const adminPassword = 'Saathi@Admin2026!';
 
   if (email.trim().toLowerCase() !== adminEmail || password !== adminPassword) {
     throw new Error('Invalid admin credentials.');

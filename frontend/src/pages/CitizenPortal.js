@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Bot, FileText, LocateFixed, MessageCircle, Phone } from 'lucide-react';
+import { Bot, FileText, LocateFixed, MessageCircle, Phone, HeartHandshake, ArrowRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ReportSubmission from './ReportSubmission';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const normalizeIndianWhatsAppNumber = (value) => {
   let digits = String(value || '').replace(/\D/g, '');
@@ -38,15 +40,27 @@ const normalizeIndianWhatsAppNumber = (value) => {
 
 const CitizenPortal = () => {
   const session = getSession();
+  const navigate = useNavigate();
   const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
   const [whatsAppNumber, setWhatsAppNumber] = useState(session?.phone || '');
 
   const openChatbot = () => {
     window.dispatchEvent(
-      new CustomEvent('volunteeriq-open-chatbot', {
+      new CustomEvent('saathi-open-chatbot', {
         detail: { starterMessage: 'Help me report an issue in my area.' },
       })
     );
+  };
+
+  const becomeVolunteer = () => {
+    window.dispatchEvent(
+      new CustomEvent('saathi-open-chatbot', {
+        detail: {
+          starterMessage: 'I want to become a volunteer. Please tell me how to register and what details I need.',
+        },
+      })
+    );
+    navigate('/register');
   };
 
   const sendWhatsAppMessage = async () => {
@@ -63,7 +77,7 @@ const CitizenPortal = () => {
       return;
     }
 
-    const messageText = `Hi ${session?.name || 'Citizen'}, your VolunteerIQ workspace is active. You can submit reports and track assistance updates here.`;
+    const messageText = `Hi ${session?.name || 'Citizen'}, your Saathi workspace is active. You can submit reports and track assistance updates here.`;
     const waNumber = normalizedTo.replace('+', '');
     const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(messageText)}`;
 
@@ -160,6 +174,23 @@ const CitizenPortal = () => {
           >
             <MessageCircle className="h-4 w-4" />
             {sendingWhatsApp ? 'Sending...' : 'Send WhatsApp'}
+          </button>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-primary-50 p-3 text-primary-600">
+              <HeartHandshake className="h-5 w-5" />
+            </div>
+            <h2 className="text-lg font-semibold text-slate-900">Become a Volunteer</h2>
+          </div>
+          <p className="mt-3 text-sm text-slate-600">If you want to help others too, create a volunteer profile from here and join the help network.</p>
+          <button
+            type="button"
+            onClick={becomeVolunteer}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700"
+          >
+            Join as Volunteer <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </div>

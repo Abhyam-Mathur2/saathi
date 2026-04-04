@@ -1,8 +1,10 @@
-const USERS_KEY = 'volunteerIQ.users';
-const SESSION_KEY = 'volunteerIQ.session';
+const USERS_KEY = 'saathi.users';
+const LEGACY_USERS_KEY = 'volunteerIQ.users';
+const SESSION_KEY = 'saathi.session';
+const LEGACY_SESSION_KEY = 'volunteerIQ.session';
 
 function readUsers() {
-  const raw = localStorage.getItem(USERS_KEY);
+  const raw = localStorage.getItem(USERS_KEY) || localStorage.getItem(LEGACY_USERS_KEY);
   return raw ? JSON.parse(raw) : [];
 }
 
@@ -11,7 +13,7 @@ function writeUsers(users) {
 }
 
 export function getSession() {
-  const raw = localStorage.getItem(SESSION_KEY);
+  const raw = localStorage.getItem(SESSION_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
   return raw ? JSON.parse(raw) : null;
 }
 

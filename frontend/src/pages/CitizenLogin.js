@@ -25,9 +25,9 @@ const CitizenLogin = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-10">
+    <div className="min-h-[calc(100vh-8rem)] px-4 py-10 flex items-center justify-center">
       <Toaster position="top-right" />
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 mb-4">
             <LogIn className="h-6 w-6" />
@@ -45,7 +45,7 @@ const CitizenLogin = () => {
               placeholder="Username"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full pl-10 rounded-lg border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
+              className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
@@ -57,14 +57,14 @@ const CitizenLogin = () => {
               placeholder="Password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full pl-10 rounded-lg border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
+              className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-emerald-700 disabled:opacity-50"
+            className="w-full h-12 bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-emerald-700 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
             Continue as Citizen
@@ -83,6 +83,10 @@ const CitizenLogin = () => {
           <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">
             Admin / Volunteer login
           </Link>
+        </p>
+
+        <p className="mt-4 text-center text-sm text-slate-500">
+          Want to help too? Open your citizen workspace and register as a volunteer.
         </p>
       </div>
     </div>

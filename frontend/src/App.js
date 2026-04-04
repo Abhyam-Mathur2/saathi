@@ -37,7 +37,7 @@ function App() {
         </main>
         <footer className="bg-white border-t border-slate-200 py-6 mt-12">
           <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-slate-500 text-sm">© 2026 VolunteerIQ – Smart Resource Allocation System</p>
+            <p className="text-slate-500 text-sm">© 2026 Saathi – Smart Resource Allocation System</p>
           </div>
         </footer>
       </div>

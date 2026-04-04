@@ -60,7 +60,7 @@ const Navbar = () => {
           <div className="flex">
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
               <Heart className="h-8 w-8 text-primary-600 fill-primary-600" />
-              <span className="text-xl font-bold text-slate-900 tracking-tight">Volunteer<span className="text-primary-600">IQ</span></span>
+              <span className="text-xl font-bold text-slate-900 tracking-tight">Saathi</span>
             </Link>
             <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
               {navItems.map((item) => {

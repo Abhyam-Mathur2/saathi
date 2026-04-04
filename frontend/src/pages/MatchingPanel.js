@@ -35,7 +35,7 @@ const MatchingPanel = () => {
       setSendingTo(volunteer._id);
       await axios.post(apiUrl('/api/whatsapp/send'), {
         to: volunteer.phone,
-        message: `Hi ${volunteer.name || 'Volunteer'}, you have a new community task from VolunteerIQ.`,
+        message: `Hi ${volunteer.name || 'Volunteer'}, you have a new community task from Saathi.`,
       });
       toast.success(`WhatsApp message sent to ${volunteer.name}`);
     } catch (error) {
@@ -55,7 +55,7 @@ const MatchingPanel = () => {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <Toaster position="top-right" />
       
-      <Link to="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary-600 mb-6 transition-colors">
+      <Link to="/admin/dashboard" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary-600 mb-6 transition-colors">
         <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
       </Link>
 

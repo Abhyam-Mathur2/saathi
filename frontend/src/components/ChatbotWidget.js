@@ -43,8 +43,10 @@ const ChatbotWidget = ({ defaultRole }) => {
       }
     };
 
+    window.addEventListener('saathi-open-chatbot', handleExternalOpen);
     window.addEventListener('volunteeriq-open-chatbot', handleExternalOpen);
     return () => {
+      window.removeEventListener('saathi-open-chatbot', handleExternalOpen);
       window.removeEventListener('volunteeriq-open-chatbot', handleExternalOpen);
     };
   }, []);
@@ -109,7 +111,7 @@ const ChatbotWidget = ({ defaultRole }) => {
           <div className="flex items-center justify-between px-4 py-3 bg-slate-900 text-white">
             <div className="flex items-center gap-2">
               <MessageSquare className="w-4 h-4" />
-              <span className="text-sm font-semibold">VolunteerIQ Chatbot</span>
+              <span className="text-sm font-semibold">Saathi Chatbot</span>
             </div>
             <button onClick={() => setOpen(false)} className="text-slate-300 hover:text-white">
               <X className="w-4 h-4" />

@@ -896,6 +896,37 @@
       },
       "_id": "542aee35-37be-4205-8d44-fe72b970ba84",
       "createdAt": "2026-04-04T15:03:27.345Z"
+    },
+    {
+      "name": "abhyam",
+      "phone": "9140366268",
+      "email": "abhyammath78@gmail.com",
+      "skills": [
+        "Food Distribution"
+      ],
+      "address": "Bakarna, Uttarakhand, India",
+      "longitude": 77.96836672783749,
+      "latitude": 30.41058308522464,
+      "profileImage": "",
+      "availability": {
+        "days": [
+          "Tuesday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.96836672783749,
+          30.41058308522464
+        ],
+        "address": "Bakarna, Uttarakhand, India"
+      },
+      "_id": "192df06e-21c6-498c-81bc-626826ec9c6f",
+      "createdAt": "2026-04-04T16:42:31.712Z"
     }
   ],
   "assignments": []
