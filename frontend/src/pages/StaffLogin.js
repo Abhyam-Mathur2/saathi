@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Lock, Mail, Loader2, CheckCircle2, HeartHandshake } from 'lucide-react';
+import { Shield, Lock, Mail, Loader2, CheckCircle2, Copy, Check } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginVolunteer } from '../utils/volunteerAuth';
 import { loginAdmin, saveSession } from '../utils/roleAuth';
@@ -10,6 +10,14 @@ const StaffLogin = () => {
   const [role, setRole] = useState('admin');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '', name: '', phone: '' });
+  const [copiedField, setCopiedField] = useState(null);
+
+  const handleCopy = (text, field) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    toast.success('Copied to clipboard!');
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -88,8 +96,86 @@ const StaffLogin = () => {
           </div>
 
           {role === 'admin' && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-              Demo admin credentials: admin@saathi.com / Saathi@Admin2026!
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900">
+              <p className="font-semibold text-sm mb-3">📋 Demo Admin Credentials:</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-amber-200">
+                  <div>
+                    <p className="text-xs text-amber-700 font-semibold">Email:</p>
+                    <p className="text-sm font-mono text-slate-900">admin@saathi.com</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('admin@saathi.com', 'email')}
+                    className="ml-2 p-2 hover:bg-amber-100 rounded-lg transition"
+                  >
+                    {copiedField === 'email' ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-amber-600" />
+                    )}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-amber-200">
+                  <div>
+                    <p className="text-xs text-amber-700 font-semibold">Password:</p>
+                    <p className="text-sm font-mono text-slate-900">Saathi@Admin2026!</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('Saathi@Admin2026!', 'password')}
+                    className="ml-2 p-2 hover:bg-amber-100 rounded-lg transition"
+                  >
+                    {copiedField === 'password' ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-amber-600" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {role === 'volunteer' && (
+            <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900">
+              <p className="font-semibold text-sm mb-3">📋 Demo Volunteer Credentials:</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                  <div>
+                    <p className="text-xs text-blue-700 font-semibold">Email:</p>
+                    <p className="text-sm font-mono text-slate-900">john@saathi.com</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('john@saathi.com', 'vol_email')}
+                    className="ml-2 p-2 hover:bg-blue-100 rounded-lg transition"
+                  >
+                    {copiedField === 'vol_email' ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-blue-600" />
+                    )}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                  <div>
+                    <p className="text-xs text-blue-700 font-semibold">Password:</p>
+                    <p className="text-sm font-mono text-slate-900">Volunteer@2026</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy('Volunteer@2026', 'vol_password')}
+                    className="ml-2 p-2 hover:bg-blue-100 rounded-lg transition"
+                  >
+                    {copiedField === 'vol_password' ? (
+                      <Check className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-blue-600" />
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

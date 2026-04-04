@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { LogIn, Mail, Lock, Loader2, Copy, Check } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginVolunteer } from '../utils/volunteerAuth';
 
@@ -8,6 +8,14 @@ const VolunteerLogin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [copiedField, setCopiedField] = useState(null);
+
+  const handleCopy = (text, field) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    toast.success('Copied to clipboard!');
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -69,6 +77,46 @@ const VolunteerLogin = () => {
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
             Login
           </button>
+
+          <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900 mt-4">
+            <p className="font-semibold text-sm mb-3">📋 Demo Volunteer Credentials:</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                <div>
+                  <p className="text-xs text-blue-700 font-semibold">Email:</p>
+                  <p className="text-sm font-mono text-slate-900">john@saathi.com</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('john@saathi.com', 'email')}
+                  className="ml-2 p-2 hover:bg-blue-100 rounded-lg transition"
+                >
+                  {copiedField === 'email' ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-blue-600" />
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
+                <div>
+                  <p className="text-xs text-blue-700 font-semibold">Password:</p>
+                  <p className="text-sm font-mono text-slate-900">Volunteer@2026</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('Volunteer@2026', 'password')}
+                  className="ml-2 p-2 hover:bg-blue-100 rounded-lg transition"
+                >
+                  {copiedField === 'password' ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-blue-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </form>
 
         <p className="text-sm text-slate-500 text-center mt-6">

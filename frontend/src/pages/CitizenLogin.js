@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AtSign, Lock, Loader2, LogIn } from 'lucide-react';
+import { AtSign, Lock, Loader2, LogIn, Copy, Check } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginCitizen } from '../utils/roleAuth';
 
@@ -8,6 +8,14 @@ const CitizenLogin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
+  const [copiedField, setCopiedField] = useState(null);
+
+  const handleCopy = (text, field) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    toast.success('Copied to clipboard!');
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -69,6 +77,46 @@ const CitizenLogin = () => {
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
             Continue as Citizen
           </button>
+
+          <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900">
+            <p className="font-semibold text-sm mb-3">📋 Demo Citizen Credentials:</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200">
+                <div>
+                  <p className="text-xs text-emerald-700 font-semibold">Username:</p>
+                  <p className="text-sm font-mono text-slate-900">citizen_demo</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('citizen_demo', 'username')}
+                  className="ml-2 p-2 hover:bg-emerald-100 rounded-lg transition"
+                >
+                  {copiedField === 'username' ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-emerald-600" />
+                  )}
+                </button>
+              </div>
+              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200">
+                <div>
+                  <p className="text-xs text-emerald-700 font-semibold">Password:</p>
+                  <p className="text-sm font-mono text-slate-900">Citizen@2026</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy('Citizen@2026', 'cit_password')}
+                  className="ml-2 p-2 hover:bg-emerald-100 rounded-lg transition"
+                >
+                  {copiedField === 'cit_password' ? (
+                    <Check className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Copy className="w-4 h-4 text-emerald-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </form>
 
         <p className="text-sm text-slate-500 text-center mt-6">
