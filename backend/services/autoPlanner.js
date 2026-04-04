@@ -25,10 +25,31 @@ exports.runAutoPlanner = async () => {
         description: r.description
     }));
 
-    // 2. Get available volunteers
-    const volunteers = await Volunteer.find({ availability: true });
-    console.log(`AutoPlanner: Found ${volunteers.length} volunteers with availability: true.`);
-    if (volunteers.length === 0) return { message: "No available volunteers found." };
+    // 2. Get volunteers and support both legacy boolean and schema-based availability objects
+    const volunteers = await Volunteer.find({});
+    const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+    const availableVolunteers = volunteers.filter((v) => {
+        const availability = v.availability;
+
+        // Legacy records seeded with `availability: true`
+        if (typeof availability === 'boolean') {
+            return availability;
+        }
+
+        // Schema-based records store `availability.days` and `availability.times`
+        if (availability && Array.isArray(availability.days)) {
+            if (availability.days.length === 0) {
+                return true;
+            }
+            return availability.days.includes(today);
+        }
+
+        // If availability is missing or malformed, keep volunteer eligible instead of dropping silently
+        return true;
+    });
+
+    console.log(`AutoPlanner: Found ${availableVolunteers.length} available volunteers.`);
+    if (availableVolunteers.length === 0) return { message: "No available volunteers found." };
 
     /**
      * Haversine distance helper for filtering
@@ -44,7 +65,7 @@ exports.runAutoPlanner = async () => {
     };
 
     // 2.5 Filter nearby tasks for each volunteer (max 500km radius for testing)
-    const filteredVolunteersData = volunteers.map(v => {
+    const filteredVolunteersData = availableVolunteers.map(v => {
         const vLat = v.location?.coordinates[1] || 20.0;
         const vLng = v.location?.coordinates[0] || 77.0;
         
@@ -124,7 +145,7 @@ exports.runAutoPlanner = async () => {
             }
 
             // Optimize Route
-            const vol = volunteersData.find(v => v.id.toString() === assign.volunteerId);
+            const vol = filteredVolunteersData.find(v => v.id.toString() === assign.volunteerId);
             if (vol && volTasks.length > 0) {
                 const optimized = await routeOptimizer.optimizeVolunteerRoute({lat: vol.lat, lng: vol.lng}, volTasks);
                 

@@ -15,27 +15,41 @@ const buildAiResponse = (parsedData = {}) => {
 
 exports.createReport = async (req, res) => {
     try {
+        console.log('Incoming Report Submission:', JSON.stringify(req.body, null, 2));
         let reportData = req.body;
         let aiResponse = null;
 
         if (req.body.isUnstructured && req.body.text) {
+            console.log('Processing unstructured report with AI...');
             const aiData = await groqService.parseUnstructuredText(req.body.text);
             reportData = { ...reportData, ...aiData };
             aiResponse = buildAiResponse(aiData);
         } else {
             if (!reportData.description || !reportData.description.trim()) {
+                console.warn('Validation Failed: Missing description');
                 return res.status(400).json({ success: false, message: 'Description is required' });
             }
             if (!reportData.issueType) {
+                console.warn('Validation Failed: Missing issueType');
                 return res.status(400).json({ success: false, message: 'Issue type is required' });
             }
             if (!reportData.location || !reportData.location.coordinates || !reportData.location.address) {
+                console.warn('Validation Failed: Incomplete location data');
                 return res.status(400).json({ success: false, message: 'Location with coordinates and address is required' });
+            }
+
+            // Ensure coordinates are numbers
+            reportData.location.coordinates = reportData.location.coordinates.map(Number);
+            if (reportData.location.coordinates.some(isNaN)) {
+                console.warn('Validation Failed: Invalid coordinates');
+                return res.status(400).json({ success: false, message: 'Invalid coordinates' });
             }
         }
 
+        console.log('Saving report to store... (Mongo Ready:', localStore.isMongoReady() + ')');
         const report = await localStore.createReport(reportData, Report);
 
+        console.log('Report created successfully:', report._id);
         res.status(201).json({
             success: true,
             message: 'Report created successfully',
@@ -43,6 +57,7 @@ exports.createReport = async (req, res) => {
             aiResponse
         });
     } catch (error) {
+        console.error('Report Creation Error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };

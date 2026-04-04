@@ -13,7 +13,7 @@ const volunteers = [
         phone: '9876543210',
         email: 'amit@example.com',
         skills: ['Medical', 'Logistics'],
-        availability: true,
+        availability: { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], times: ['Anytime'] },
         location: { type: 'Point', coordinates: [85.1400, 25.5900], address: 'Patna, Bihar' }
     },
     {
@@ -21,7 +21,7 @@ const volunteers = [
         phone: '9823456789',
         email: 'priya@example.com',
         skills: ['Food Distribution', 'Counseling'],
-        availability: true,
+        availability: { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], times: ['Anytime'] },
         location: { type: 'Point', coordinates: [72.8800, 19.0800], address: 'Mumbai, Maharashtra' }
     },
     {
@@ -29,7 +29,7 @@ const volunteers = [
         phone: '9123456780',
         email: 'rahul@example.com',
         skills: ['Construction', 'Logistics', 'Transportation'],
-        availability: true,
+        availability: { days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], times: ['Anytime'] },
         location: { type: 'Point', coordinates: [77.2100, 28.6200], address: 'Delhi' }
     }
 ];

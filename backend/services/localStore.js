@@ -225,17 +225,22 @@ function normalizeVolunteer(volunteer) {
 }
 
 async function createReport(reportData, ReportModel) {
-  if (isMongoReady()) {
-    const report = new ReportModel(reportData);
-    await report.save();
-    return report.toObject();
-  }
+  try {
+    if (isMongoReady()) {
+      const report = new ReportModel(reportData);
+      await report.save();
+      return report.toObject();
+    }
 
-  const store = readStore();
-  const report = normalizeReport(reportData);
-  store.reports.unshift(report);
-  writeStore(store);
-  return report;
+    const store = readStore();
+    const report = normalizeReport(reportData);
+    store.reports.unshift(report);
+    writeStore(store);
+    return report;
+  } catch (error) {
+    console.error('LocalStore createReport error:', error);
+    throw error;
+  }
 }
 
 async function listReports(ReportModel) {

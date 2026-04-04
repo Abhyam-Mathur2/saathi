@@ -181,7 +181,8 @@ const ReportSubmission = () => {
       setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041, reportImage: '' });
       setSelectedImageName('');
     } catch (error) {
-      toast.error('Submission failed.');
+      const errorMsg = error.response?.data?.message || 'Submission failed.';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
