@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Mic, MicOff, Upload, Send, FileText, Loader2, MapPin, Smartphone, X, LocateFixed } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
 
 const ReportSubmission = () => {
@@ -393,6 +394,7 @@ const ReportSubmission = () => {
           )}
         </div>
       </div>
+      <ChatbotWidget defaultRole="citizen" />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserPlus, User, Mail, Phone, Lock, Loader2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { signupVolunteer } from '../utils/volunteerAuth';
 
 const VolunteerSignup = () => {
@@ -130,6 +131,7 @@ const VolunteerSignup = () => {
           </Link>
         </p>
       </div>
+      <ChatbotWidget defaultRole="volunteer" />
     </div>
   );
 };

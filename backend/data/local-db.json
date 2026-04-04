@@ -2,6 +2,27 @@
   "reports": [
     {
       "isUnstructured": true,
+      "text": "muje help chaiye yaha medicines ki kami h",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.2301,
+          28.7041
+        ],
+        "address": "India"
+      },
+      "issueType": "Health",
+      "urgency": 8,
+      "description": "Medicine shortage in area",
+      "aiAnalysis": {
+        "reasoning": "Hindi sentence 'muje help chaiye yaha medicines ki kami h' indicates assistance is needed due to medicine shortage in the location. Estimated as India since no specific location is mentioned."
+      },
+      "_id": "1f436c32-e82f-457d-868e-e3d12c759955",
+      "status": "Pending",
+      "createdAt": "2026-04-04T17:08:40.018Z"
+    },
+    {
+      "isUnstructured": true,
       "text": "hii",
       "status": "Invalid input",
       "message": "Input text cannot be analyzed without providing a valid community need report.",
@@ -833,37 +854,6 @@
       },
       "_id": "be66c5e5-cbd3-424d-a9cd-d7e039fb5ecf",
       "createdAt": "2026-04-04T11:46:19.513Z"
-    },
-    {
-      "name": "Abhyam Mathur ",
-      "phone": "9140366268",
-      "email": "abhyammath78@gmail.com",
-      "skills": [
-        "Food Distribution"
-      ],
-      "address": "Vikasnagar, Uttarakhand, India",
-      "longitude": 77.96886439870592,
-      "latitude": 30.410854108421372,
-      "profileImage": "",
-      "availability": {
-        "days": [
-          "Tuesday"
-        ],
-        "times": [
-          "Morning",
-          "Afternoon"
-        ]
-      },
-      "location": {
-        "type": "Point",
-        "coordinates": [
-          77.96886439870592,
-          30.410854108421372
-        ],
-        "address": "Vikasnagar, Uttarakhand, India"
-      },
-      "_id": "61ae0701-ba08-45b0-9257-9e90e2066144",
-      "createdAt": "2026-04-04T14:48:35.409Z"
     },
     {
       "name": "abhyam",

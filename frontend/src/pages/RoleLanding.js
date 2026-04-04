@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, UserRound, HeartHandshake, Bot, ArrowRight } from 'lucide-react';
+import ChatbotWidget from '../components/ChatbotWidget';
 
 const roleCards = [
   {
@@ -88,6 +89,7 @@ const RoleLanding = () => {
           </div>
         ))}
       </div>
+      <ChatbotWidget defaultRole="citizen" />
     </div>
   );
 };

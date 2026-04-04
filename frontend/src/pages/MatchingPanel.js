@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { User, MapPin, Award, Calendar, ChevronLeft, CheckCircle, ShieldCheck, MessageCircle } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
 
 const MatchingPanel = () => {
@@ -55,7 +56,7 @@ const MatchingPanel = () => {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <Toaster position="top-right" />
       
-      <Link to="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary-600 mb-6 transition-colors">
+      <Link to="/admin/dashboard" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary-600 mb-6 transition-colors">
         <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
       </Link>
 
@@ -162,6 +163,7 @@ const MatchingPanel = () => {
           </div>
         )}
       </div>
+      <ChatbotWidget defaultRole="admin" />
     </div>
   );
 };

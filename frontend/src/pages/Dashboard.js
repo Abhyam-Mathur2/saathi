@@ -12,7 +12,9 @@ import {
   AlertTriangle, MapPin, ChevronRight, LayoutDashboard 
 } from 'lucide-react';
 import UrgencyBadge from '../components/UrgencyBadge';
+import ChatbotWidget from '../components/ChatbotWidget';
 import { Link } from 'react-router-dom';
+import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
 
 // Fix Leaflet marker icons
@@ -38,6 +40,8 @@ const emptyStats = {
 const Dashboard = () => {
   const [stats, setStats] = useState(emptyStats);
   const [loading, setLoading] = useState(true);
+  const session = getSession();
+  const backPath = session?.role === 'volunteer' ? '/volunteer' : '/admin';
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -89,9 +93,12 @@ const Dashboard = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
+          <Link to={backPath} className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-primary-600 mb-3 transition-colors">
+            <ChevronRight className="w-4 h-4 mr-1 rotate-180" /> Back
+          </Link>
           <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
             <LayoutDashboard className="w-8 h-8 text-primary-600" />
-            Admin Dashboard
+            Saathi Dashboard
           </h1>
           <p className="text-slate-500">Real-time community needs and resource allocation overview.</p>
         </div>
@@ -214,6 +221,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <ChatbotWidget defaultRole="admin" />
     </div>
   );
 };

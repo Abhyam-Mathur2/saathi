@@ -2,7 +2,7 @@ const SESSION_KEY = 'saathi.activeSession';
 const CITIZEN_USERS_KEY = 'saathi.citizenUsers';
 
 function readSession() {
-  const raw = localStorage.getItem(SESSION_KEY);
+  const raw = localStorage.getItem(SESSION_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
   return raw ? JSON.parse(raw) : null;
 }
 
@@ -12,7 +12,7 @@ function writeSession(session) {
 }
 
 function readCitizenUsers() {
-  const raw = localStorage.getItem(CITIZEN_USERS_KEY);
+  const raw = localStorage.getItem(CITIZEN_USERS_KEY) || localStorage.getItem(LEGACY_CITIZEN_USERS_KEY);
   return raw ? JSON.parse(raw) : [];
 }
 
@@ -107,6 +107,26 @@ export function loginCitizen({ username, password }) {
   const cleanUsername = String(username || '').trim().toLowerCase();
   const cleanPassword = String(password || '');
 
+  // Check hardcoded demo citizen accounts first (fallback)
+  const demoCitizens = [
+    { username: 'citizen_demo', password: 'Citizen@2026', name: 'Demo Citizen' },
+    { username: 'priya_demo', password: 'Citizen@2026', name: 'Priya Sharma' },
+  ];
+
+  const demoMatch = demoCitizens.find(
+    (demo) => demo.username === cleanUsername && demo.password === cleanPassword
+  );
+
+  if (demoMatch) {
+    return saveSession('citizen', {
+      id: `demo-citizen-${Date.now()}`,
+      name: demoMatch.name,
+      phone: '',
+      city: 'Demo',
+    });
+  }
+
+  // Then check localStorage for registered citizen accounts
   const users = readCitizenUsers();
   const user = users.find(
     (item) => item.username === cleanUsername && item.password === cleanPassword
