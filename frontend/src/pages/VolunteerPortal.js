@@ -199,42 +199,60 @@ const VolunteerPortal = () => {
         </div>
         <p className="mt-2 text-sm text-slate-600">Use the WhatsApp chat box below to contact a citizen, coordinator, or another volunteer directly.</p>
 
-        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_2fr]">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <MessageSquareText className="h-4 w-4 text-emerald-600" />
-              WhatsApp Chat
+        <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
+              <MessageSquareText className="h-5 w-5" />
             </div>
-            <p className="mt-2 text-xs text-slate-500">Send a quick WhatsApp message from this page. The chat also opens in WhatsApp Web.</p>
+            <h3 className="text-lg font-semibold text-slate-900">Direct WhatsApp Communication</h3>
           </div>
-
-          <div className="space-y-3 rounded-2xl border border-slate-200 p-4">
-            <div className="relative">
-              <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-              <input
-                type="tel"
-                value={whatsappNumber}
-                onChange={(e) => setWhatsappNumber(e.target.value)}
-                placeholder="+919876543210"
-                className="w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+          
+          <p className="text-sm text-slate-700 mb-5 font-medium">Contact citizens, coordinators, or other volunteers directly via WhatsApp. Enter their phone number and your message below.</p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+                Recipient's Phone Number
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-3.5 w-5 h-5 text-emerald-600" />
+                <input
+                  type="tel"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  placeholder="Enter mobile number (e.g., 9876543210)"
+                  className="w-full h-12 pl-13 pr-4 rounded-xl border-2 border-emerald-300 bg-white text-slate-900 font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                />
+              </div>
+              <p className="mt-2 text-xs text-slate-600">Format: 10-digit Indian number (with or without +91 prefix)</p>
+            </div>
+            
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+                Your Message
+              </label>
+              <textarea
+                rows="3"
+                value={whatsappMessage}
+                onChange={(e) => setWhatsappMessage(e.target.value)}
+                placeholder="Type your message here... (e.g., Hi, I am available to help with a nearby community report)"
+                className="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all resize-none"
               />
             </div>
-            <textarea
-              rows="3"
-              value={whatsappMessage}
-              onChange={(e) => setWhatsappMessage(e.target.value)}
-              placeholder="Type your WhatsApp message..."
-              className="w-full rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
-            />
+            
             <button
               type="button"
               onClick={handleWhatsAppChat}
-              disabled={sendingWhatsApp}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+              disabled={sendingWhatsApp || !whatsappNumber.trim()}
+              className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
             >
-              <Send className="h-4 w-4" />
-              {sendingWhatsApp ? 'Sending...' : 'Open / Send WhatsApp'}
+              <Send className="h-5 w-5" />
+              {sendingWhatsApp ? 'Sending WhatsApp Message...' : 'Open WhatsApp & Send Message'}
             </button>
+            
+            <p className="text-xs text-emerald-700 bg-emerald-100 rounded-lg p-2 text-center">
+              💬 Message will open in WhatsApp Web - tap Send to confirm
+            </p>
           </div>
         </div>
 
