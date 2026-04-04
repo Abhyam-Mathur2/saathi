@@ -33,6 +33,10 @@ const VolunteerSchema = new mongoose.Schema({
         },
         address: String
     },
+    profileImage: {
+        type: String, // Base64 string for demo purposes
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

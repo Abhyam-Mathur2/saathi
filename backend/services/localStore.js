@@ -374,6 +374,24 @@ async function countAssignments(AssignmentModel) {
   return readStore().assignments.length;
 }
 
+async function deleteVolunteer(volunteerId, VolunteerModel) {
+  if (isMongoReady()) {
+    const deleted = await VolunteerModel.findByIdAndDelete(volunteerId);
+    return !!deleted;
+  }
+
+  const store = readStore();
+  const initialLength = store.volunteers.length;
+  store.volunteers = store.volunteers.filter((volunteer) => volunteer._id !== volunteerId);
+
+  if (store.volunteers.length === initialLength) {
+    return false;
+  }
+
+  writeStore(store);
+  return true;
+}
+
 module.exports = {
   createReport,
   listReports,
@@ -386,5 +404,6 @@ module.exports = {
   listVolunteers,
   countVolunteers,
   countAssignments,
+  deleteVolunteer,
   isMongoReady,
 };

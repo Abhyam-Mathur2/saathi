@@ -28,6 +28,18 @@ const ReportSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    reportImage: {
+        type: String,
+        default: ''
+    },
+    source: {
+        type: String,
+        default: 'web'
+    },
+    originalText: {
+        type: String,
+        default: ''
+    },
     status: {
         type: String,
         enum: ['Pending', 'Assigned', 'Resolved'],

@@ -18,3 +18,15 @@ exports.getVolunteers = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+exports.deleteVolunteer = async (req, res) => {
+    try {
+        const deleted = await localStore.deleteVolunteer(req.params.id, Volunteer);
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Volunteer not found' });
+        }
+        res.status(200).json({ success: true, message: 'Volunteer removed' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

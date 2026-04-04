@@ -6,6 +6,8 @@ require('dotenv').config();
 const reportRoutes = require('./routes/reportRoutes');
 const volunteerRoutes = require('./routes/volunteerRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const whatsappRoutes = require('./routes/whatsappRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -27,11 +29,14 @@ const startServer = () => {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // Routes
 app.use('/api/reports', reportRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Root route
 app.get('/', (req, res) => {

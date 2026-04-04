@@ -2,6 +2,267 @@
   "reports": [
     {
       "isUnstructured": true,
+      "text": "hii",
+      "status": "Invalid input",
+      "message": "Input text cannot be analyzed without providing a valid community need report.",
+      "_id": "68470ec4-22e8-41ac-9b53-dc52f54d1ace",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "createdAt": "2026-04-04T14:53:39.951Z"
+    },
+    {
+      "description": "",
+      "issueType": "Food",
+      "urgency": 5,
+      "address": "",
+      "longitude": 77.1025,
+      "latitude": 28.7041,
+      "reportImage": "",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "_id": "69418147-e7a7-438e-9b27-e4b1ebf5c866",
+      "status": "Pending",
+      "createdAt": "2026-04-04T14:53:29.145Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "hiii",
+      "error": {
+        "message": "No community need report provided"
+      },
+      "_id": "038718a4-eb85-4cc2-a7f2-b4569f4e20cc",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "status": "Pending",
+      "createdAt": "2026-04-04T14:49:16.940Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "urgent health issue need help",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "urgent health issue need help",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "279cc2ce-d2f8-4589-965f-765cb2684cfe",
+      "status": "Pending",
+      "createdAt": "2026-04-04T12:01:13.144Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "Need urgent food support near Lucknow station",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "Need urgent food support near Lucknow station",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "7333e1ed-4a0b-4d89-831e-329cd7b7419c",
+      "status": "Pending",
+      "createdAt": "2026-04-04T11:55:19.401Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "Need urgent food support near Lucknow station",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "Need urgent food support near Lucknow station",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "3c50eae7-7f90-484d-8f41-3a0780fbdafd",
+      "status": "Pending",
+      "createdAt": "2026-04-04T11:54:35.789Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "Need urgent food support near Lucknow station",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "Need urgent food support near Lucknow station",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "f96e7cfd-2077-4995-8986-b8c82771f1c7",
+      "status": "Pending",
+      "createdAt": "2026-04-04T11:53:25.120Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "hi hello",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "hi hello",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "500142d2-8409-46b4-9ef5-f58e6624e344",
+      "status": "Pending",
+      "createdAt": "2026-04-04T11:29:06.956Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "dfsdfgsdg",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "dfsdfgsdg",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "04f098c4-2660-4a7d-918f-d3fec7f40b3d",
+      "status": "Pending",
+      "createdAt": "2026-04-04T11:24:19.973Z"
+    },
+    {
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "Need food supplies in Lucknow urgently",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "Need food supplies in Lucknow urgently",
+      "status": "Pending",
+      "_id": "c2cebaab-45fd-4668-8418-429a245dd32b",
+      "createdAt": "2026-04-04T11:18:12.579Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "hello",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "hello",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "166d8021-0f13-4b08-ae08-35d76fb96d55",
+      "status": "Pending",
+      "createdAt": "2026-04-04T10:51:38.139Z"
+    },
+    {
+      "isUnstructured": true,
+      "text": "hi emergency in lucknow\n",
+      "issueType": "Other",
+      "urgency": 5,
+      "description": "hi emergency in lucknow\n",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "aiAnalysis": {
+        "reasoning": "Failed to parse with AI, used fallback defaults."
+      },
+      "_id": "6e9cdaca-6833-4103-9587-31a259754f4b",
+      "status": "Pending",
+      "createdAt": "2026-04-04T10:45:59.215Z"
+    },
+    {
+      "issueType": "Infrastructure",
+      "description": "API upload persistence check",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Test Address"
+      },
+      "reportImage": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7YfZkAAAAASUVORK5CYII=",
+      "urgency": 6,
+      "status": "Pending",
+      "_id": "1f50be07-1d2b-4b3a-b32f-16a4bbed31ba",
+      "createdAt": "2026-04-04T10:44:48.617Z"
+    },
+    {
+      "isUnstructured": true,
       "text": "hi urgent need for blankets",
       "issueType": "Other",
       "urgency": 5,
@@ -449,6 +710,192 @@
       },
       "_id": "2ce5b1ac-9b84-4dd6-a4fb-5655743678b5",
       "createdAt": "2026-04-04T07:14:42.950Z"
+    },
+    {
+      "skills": [
+        "Medical",
+        "Logistics"
+      ],
+      "name": "Execution Test Volunteer",
+      "profileImage": "https://example.com/profile.jpg",
+      "phone": "9876543210",
+      "email": "execution.test.volunteer+20260404171059@example.com",
+      "availability": {
+        "days": [
+          "Saturday",
+          "Sunday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.5946,
+          12.9716
+        ],
+        "address": "Bengaluru, Karnataka"
+      },
+      "_id": "a0388bfa-bb46-4154-b91a-89dd08e4f6e5",
+      "createdAt": "2026-04-04T11:40:59.168Z"
+    },
+    {
+      "skills": [
+        "Medical",
+        "Logistics"
+      ],
+      "name": "Execution Test Volunteer",
+      "profileImage": "https://example.com/profile.jpg",
+      "phone": "9876543210",
+      "email": "execution.test.volunteer+20260404171126@example.com",
+      "availability": {
+        "days": [
+          "Saturday",
+          "Sunday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.5946,
+          12.9716
+        ],
+        "address": "Bengaluru, Karnataka"
+      },
+      "_id": "6bc45bb2-4bab-44e5-9c3b-6067e6ab7ad4",
+      "createdAt": "2026-04-04T11:41:26.045Z"
+    },
+    {
+      "skills": [
+        "Medical",
+        "Logistics"
+      ],
+      "name": "Execution Test Volunteer",
+      "phone": "9876543210",
+      "email": "execution.test.volunteer+20260404171251@example.com",
+      "availability": {
+        "days": [
+          "Saturday",
+          "Sunday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.5946,
+          12.9716
+        ],
+        "address": "Bengaluru, Karnataka"
+      },
+      "_id": "e8f5dc33-1391-4418-8d92-100a4651416f",
+      "createdAt": "2026-04-04T11:42:52.038Z"
+    },
+    {
+      "name": "Abhyam Mathur ",
+      "phone": "9140366268",
+      "email": "abhyammath78@gmail.com",
+      "skills": [
+        "Education",
+        "Food Distribution",
+        "Medical"
+      ],
+      "address": "Lucknow",
+      "longitude": 77.1025,
+      "latitude": 28.7041,
+      "profileImage": "",
+      "availability": {
+        "days": [
+          "Wednesday",
+          "Tuesday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Lucknow"
+      },
+      "_id": "be66c5e5-cbd3-424d-a9cd-d7e039fb5ecf",
+      "createdAt": "2026-04-04T11:46:19.513Z"
+    },
+    {
+      "name": "Abhyam Mathur ",
+      "phone": "9140366268",
+      "email": "abhyammath78@gmail.com",
+      "skills": [
+        "Food Distribution"
+      ],
+      "address": "Vikasnagar, Uttarakhand, India",
+      "longitude": 77.96886439870592,
+      "latitude": 30.410854108421372,
+      "profileImage": "",
+      "availability": {
+        "days": [
+          "Tuesday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.96886439870592,
+          30.410854108421372
+        ],
+        "address": "Vikasnagar, Uttarakhand, India"
+      },
+      "_id": "61ae0701-ba08-45b0-9257-9e90e2066144",
+      "createdAt": "2026-04-04T14:48:35.409Z"
+    },
+    {
+      "name": "abhyam",
+      "phone": "9140366268",
+      "email": "abhyammath78@gmail.com",
+      "skills": [
+        "Food Distribution"
+      ],
+      "address": "Vikasnagar, Uttarakhand, India",
+      "longitude": 77.96893402471612,
+      "latitude": 30.41083352155621,
+      "profileImage": "",
+      "availability": {
+        "days": [
+          "Tuesday",
+          "Wednesday"
+        ],
+        "times": [
+          "Morning",
+          "Afternoon"
+        ]
+      },
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.96893402471612,
+          30.41083352155621
+        ],
+        "address": "Vikasnagar, Uttarakhand, India"
+      },
+      "_id": "542aee35-37be-4205-8d44-fe72b970ba84",
+      "createdAt": "2026-04-04T15:03:27.345Z"
     }
   ],
   "assignments": []

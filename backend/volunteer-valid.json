@@ -1,0 +1,27 @@
+{
+    "skills":  [
+                   "Medical",
+                   "Logistics"
+               ],
+    "name":  "Execution Test Volunteer",
+    "phone":  "9876543210",
+    "email":  "execution.test.volunteer+20260404171251@example.com",
+    "availability":  {
+                         "days":  [
+                                      "Saturday",
+                                      "Sunday"
+                                  ],
+                         "times":  [
+                                       "Morning",
+                                       "Afternoon"
+                                   ]
+                     },
+    "location":  {
+                     "coordinates":  [
+                                         77.5946,
+                                         12.9716
+                                     ],
+                     "type":  "Point",
+                     "address":  "Bengaluru, Karnataka"
+                 }
+}
