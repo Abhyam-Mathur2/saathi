@@ -1,4 +1,4 @@
-const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000').replace(/\/+$/, '');
+const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL || 'http://localhost:5001').replace(/\/+$/, '');
 
 const apiUrl = (path) => {
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
