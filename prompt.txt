@@ -1,0 +1,184 @@
+You are an expert full-stack developer, system architect, and AI engineer 
+with deep experience building hackathon prototypes that are clean, 
+runnable, and impressive to judges.
+
+PROJECT TITLE: VolunteerIQ – Smart Resource Allocation & Data-Driven 
+Volunteer Coordination System
+
+PROBLEM CONTEXT:
+NGOs and local organizations collect community needs data through paper 
+surveys, field reports, WhatsApp messages, and informal communication. 
+This data is scattered and unstructured, making it difficult to identify 
+urgent needs and efficiently allocate volunteers.
+
+OBJECTIVE:
+Build a full-stack web application that:
+1. Collects community needs data from multiple input sources
+2. Centralizes and structures the data
+3. Analyzes and prioritizes needs using AI
+4. Intelligently matches volunteers to tasks based on skills, location, 
+   and availability
+5. Displays everything on a real-time admin dashboard
+
+════════════════════════════════════════
+CORE FEATURES
+════════════════════════════════════════
+
+1. DATA COLLECTION MODULE
+   - Mobile-friendly web form (React)
+   - Fields: location (GPS coordinates), issue type (dropdown), urgency 
+     level (1-5), description (text), optional image upload
+   - Simulate WhatsApp input: a simple text box that mimics receiving a 
+     WhatsApp message (parse it using AI)
+   - Voice input: use browser's Web Speech API (SpeechRecognition) for 
+     speech-to-text, no external API needed
+   - Document upload: accept PDF/image → extract text using Tesseract.js 
+     (client-side OCR, no API key needed)
+
+2. BACKEND SYSTEM
+   - Node.js + Express REST API
+   - MongoDB with Mongoose for data storage
+   - RESTful endpoints:
+     * POST /api/reports         → submit community need report
+     * GET  /api/reports         → fetch all reports
+     * POST /api/volunteers      → register volunteer
+     * GET  /api/volunteers      → fetch all volunteers
+     * GET  /api/match/:reportId → get matched volunteers for a report
+     * GET  /api/dashboard       → aggregated stats for dashboard
+   - Use dotenv for config, cors for cross-origin, express-validator for 
+     input validation
+
+3. AI PROCESSING & PRIORITIZATION (USE GROQ API)
+   - Use Groq API (model: llama3-8b-8192 or mixtral-8x7b-32768) for:
+     * Parsing unstructured text (WhatsApp/voice) into structured JSON:
+       { location, issueType, urgency, description }
+     * Categorizing needs into: Food, Health, Education, Infrastructure, 
+       Safety, Environment
+     * Assigning urgency score (1-10) with reasoning
+     * Detecting duplicate or similar reports (compare descriptions)
+     * Predicting future needs based on patterns (bonus)
+   - Groq API endpoint: https://api.groq.com/openai/v1/chat/completions
+   - Use OpenAI-compatible SDK format (Groq supports it)
+   - Always prompt for JSON-only responses for structured outputs
+
+4. VOLUNTEER MANAGEMENT
+   - Registration form: name, phone, email, skills (multi-select), 
+     availability (days/times), location (GPS or manual entry)
+   - Skills options: Medical, Food Distribution, Education, Construction, 
+     Logistics, Counseling, Tech Support, Transportation
+   - Store in MongoDB volunteers collection
+
+5. MATCHING ALGORITHM
+   Implement this exact scoring formula in a dedicated matchingEngine.js:
+   
+   totalScore = (skillScore × 0.4) + (proximityScore × 0.3) + 
+                (urgencyScore × 0.2) + (availabilityScore × 0.1)
+   
+   Where:
+   - skillScore     = (matching skills count / required skills count) × 10
+   - proximityScore = 10 - min(distanceInKm / 5, 10)  
+                      [using Haversine formula for GPS distance]
+   - urgencyScore   = report urgency level (1-10)
+   - availabilityScore = 10 if volunteer available today, else 5
+   
+   Return top 3 matched volunteers per report, with score breakdown.
+   Show the full Haversine distance function implementation.
+
+6. ADMIN DASHBOARD (CRITICAL - make this visually impressive)
+   Use React + Recharts (or Chart.js) for:
+   - Summary cards: Total Reports, Urgent Issues, Volunteers, 
+     Assignments Made
+   - Bar chart: Issues by category
+   - Line chart: Reports submitted over time (last 7 days)
+   - Priority list: Top 5 urgent unassigned tasks (color-coded red/orange/green)
+   - Volunteer match panel: Click a report → see top 3 matched volunteers 
+     with scores
+   - Heatmap simulation: Display need locations as colored markers on a 
+     map using Leaflet.js (free, no API key needed)
+   - Assigned vs Unassigned task count (donut chart)
+
+7. NOTIFICATIONS (SIMULATE)
+   - When a high-urgency report (score ≥ 8) is submitted:
+     * Show a toast notification in the dashboard
+     * Log a simulated SMS/WhatsApp alert: 
+       "Alert sent to [Volunteer Name]: Urgent task in [Location]"
+   - Use a simple in-app notification bell with unread count
+
+════════════════════════════════════════
+TECH STACK
+════════════════════════════════════════
+- Frontend : React + Tailwind CSS + Recharts + Leaflet.js
+- Backend  : Node.js + Express + MongoDB (Mongoose)
+- AI       : Groq API (llama3-8b-8192) — OpenAI-compatible format
+- OCR      : Tesseract.js (browser-side, no API key)
+- Voice    : Web Speech API (browser built-in, no API key)
+- Maps     : Leaflet.js (free, no API key)
+- Auth     : None (skip for hackathon, mention as future scope)
+
+════════════════════════════════════════
+OUTPUT FORMAT (FOLLOW STRICTLY)
+════════════════════════════════════════
+
+STEP 1 — System Architecture
+  Draw a clear text-based architecture diagram showing data flow from 
+  input → backend → AI → DB → dashboard
+
+STEP 2 — Folder Structure
+  Show complete folder/file tree for both frontend and backend
+
+STEP 3 — Backend Code
+  Provide complete, runnable code for:
+  - server.js (entry point)
+  - routes/ (all route files)
+  - models/ (Mongoose schemas: Report, Volunteer, Assignment)
+  - controllers/ (business logic separated from routes)
+  - services/groqService.js (Groq API calls)
+  - services/matchingEngine.js (full matching algorithm with Haversine)
+  - middleware/ (error handler, validator)
+  - .env.example
+
+STEP 4 — Frontend Code
+  Provide complete React code for:
+  - App.js with routing (React Router)
+  - pages/Dashboard.js (charts, stats, map)
+  - pages/ReportSubmission.js (data collection form with voice + OCR)
+  - pages/VolunteerRegistration.js
+  - pages/MatchingPanel.js
+  - components/Navbar.js, NotificationBell.js, UrgencyBadge.js
+
+STEP 5 — Sample Data
+  Provide 10 realistic dummy reports and 8 dummy volunteers as JSON 
+  (Indian NGO context — villages, common issues like flood relief, 
+  medical camps, food distribution)
+
+STEP 6 — Setup Instructions
+  Exact terminal commands to:
+  - Clone/init project
+  - Install dependencies (both frontend + backend)
+  - Set up .env with Groq API key
+  - Seed dummy data
+  - Run frontend + backend simultaneously
+
+STEP 7 — Scaling Suggestions
+  Brief bullet points on: ML improvements, AWS deployment, 
+  offline PWA support, multilingual support (i18n)
+
+════════════════════════════════════════
+CONSTRAINTS
+════════════════════════════════════════
+- Every file must be complete and runnable — no placeholders like 
+  "add your logic here"
+- Add meaningful comments in code
+- Keep components modular and reusable
+- Prioritize demo-ability: the app must look impressive in a live demo
+- Total backend dependencies should stay minimal
+- No paid APIs except Groq (which has a free tier)
+
+════════════════════════════════════════
+BONUS FEATURES (implement if possible)
+════════════════════════════════════════
+- PWA support (offline form submission with service worker)
+- Multilingual UI toggle (English / Hindi)
+- AI prediction: "Based on past data, food shortage likely in Zone B 
+  next week" — generate this using Groq
+- Export report as PDF (use jsPDF)
