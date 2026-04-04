@@ -7,7 +7,6 @@ import ChatbotWidget from '../components/ChatbotWidget';
 import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 
 const normalizeIndianWhatsAppNumber = (value) => {
   let digits = String(value || '').replace(/\D/g, '');
