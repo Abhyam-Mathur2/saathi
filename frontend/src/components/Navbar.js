@@ -38,6 +38,7 @@ const Navbar = () => {
           { name: 'Reports', path: '/report', icon: FileText },
           { name: 'Directory', path: '/volunteers', icon: Users },
           { name: 'Impact Map', path: '/impact-map', icon: FileText },
+          { name: 'Auto Planner', path: '/auto-planner', icon: FileText },
           { name: 'Route Planner', path: '/route-planner', icon: FileText },
         ]
       : session?.role === 'citizen'
