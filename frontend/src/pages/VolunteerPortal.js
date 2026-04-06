@@ -29,6 +29,7 @@ const getDistanceInKm = (coord1, coord2) => {
 
 const VolunteerPortal = () => {
   const [reports, setReports] = useState([]);
+  const [volunteers, setVolunteers] = useState([]);
   const [locationReady, setLocationReady] = useState(true);
   const session = getSession();
   const [whatsappNumber, setWhatsappNumber] = useState(session?.phone || '');
@@ -134,26 +135,61 @@ const VolunteerPortal = () => {
           console.warn('Volunteer has no location coordinates');
           setLocationReady(false);
           setReports([]);
+          setVolunteers([]);
           return;
         }
 
-        const urgentNearbyReports = (reportsResponse.data.data || [])
-          .filter((report) => Number(report.urgency) >= 8)
+        const userLatitude = volunteerCoordinates[1];
+        const userLongitude = volunteerCoordinates[0];
+
+        const [nearbyReportsResponse, nearbyVolunteersResponse] = await Promise.all([
+          axios.get(apiUrl('/api/reports'), {
+            params: {
+              latitude: userLatitude,
+              longitude: userLongitude,
+              radiusKm: MAX_DISTANCE_KM,
+            },
+          }),
+          axios.get(apiUrl('/api/volunteers'), {
+            params: {
+              latitude: userLatitude,
+              longitude: userLongitude,
+              radiusKm: MAX_DISTANCE_KM,
+            },
+          }),
+        ]);
+
+        const nearbyReports = (nearbyReportsResponse.data.data || [])
           .map((report) => ({
             ...report,
             distanceKm: report?.location?.coordinates?.length >= 2
               ? getDistanceInKm(volunteerCoordinates, report.location.coordinates)
               : Number.MAX_SAFE_INTEGER,
           }))
-          .filter((report) => report.distanceKm <= MAX_DISTANCE_KM)
+          .sort((a, b) => {
+            const urgencyDiff = Number(b.urgency) - Number(a.urgency);
+            if (urgencyDiff !== 0) return urgencyDiff;
+            return a.distanceKm - b.distanceKm;
+          });
+
+        const nearbyVolunteers = (nearbyVolunteersResponse.data.data || [])
+          .filter((volunteer) => String(volunteer.email || '').toLowerCase() !== String(volunteerEmail).toLowerCase())
+          .map((volunteer) => ({
+            ...volunteer,
+            distanceKm: volunteer?.location?.coordinates?.length >= 2
+              ? getDistanceInKm(volunteerCoordinates, volunteer.location.coordinates)
+              : Number.MAX_SAFE_INTEGER,
+          }))
           .sort((a, b) => a.distanceKm - b.distanceKm);
 
         setLocationReady(true);
-        setReports(urgentNearbyReports.slice(0, 5));
+        setReports(nearbyReports.slice(0, 8));
+        setVolunteers(nearbyVolunteers.slice(0, 5));
       } catch (error) {
         console.error('Error fetching reports:', error);
         setLocationReady(false);
         setReports([]);
+        setVolunteers([]);
       }
     };
 
@@ -181,7 +217,7 @@ const VolunteerPortal = () => {
                 <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{report.issueType}</p>
                 <h2 className="mt-2 text-lg font-semibold text-slate-900 line-clamp-2">{report.description}</h2>
               </div>
-              <div className="rounded-full bg-red-50 p-2 text-red-500">
+              <div className={`rounded-full p-2 ${Number(report.urgency) >= 8 ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
                 <ShieldCheck className="h-5 w-5" />
               </div>
             </div>
@@ -200,6 +236,9 @@ const VolunteerPortal = () => {
                 Open Match <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
+            <p className="mt-3 text-xs font-medium text-slate-500">
+              {Number(report.urgency) >= 8 ? 'Urgent' : 'Nearby'} report
+            </p>
           </div>
         )) : (
           <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 md:col-span-2 xl:col-span-3">
@@ -230,6 +269,34 @@ const VolunteerPortal = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-2 font-semibold text-slate-900">
+          <User className="h-5 w-5 text-primary-600" />
+          Nearby volunteers
+        </div>
+        <p className="mt-2 text-sm text-slate-600">Volunteers within {MAX_DISTANCE_KM} km of your location.</p>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {volunteers.length > 0 ? volunteers.map((volunteer) => (
+            <div key={volunteer._id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-900">{volunteer.name}</p>
+                  <p className="text-xs text-slate-500">{volunteer.location?.address || 'Nearby location'}</p>
+                </div>
+                <span className="text-xs font-semibold text-primary-700 bg-primary-50 px-2 py-1 rounded-full">
+                  {volunteer.distanceKm.toFixed(1)} km
+                </span>
+              </div>
+              <p className="mt-3 text-xs text-slate-600">
+                Skills: {(volunteer.skills || []).slice(0, 3).join(', ') || 'Not specified'}
+              </p>
+            </div>
+          )) : (
+            <div className="text-sm text-slate-500">No other nearby volunteers found.</div>
+          )}
+        </div>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
