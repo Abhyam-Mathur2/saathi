@@ -83,6 +83,9 @@ A comprehensive web-based platform designed to connect volunteers with community
 - Real-time message delivery status
 - Two-way communication for urgent coordination
 - Integration with both volunteer and citizen interfaces
+- Incoming WhatsApp webhook support for guided report registration
+- Conversational commands support (`START`, `HELP`, `RESET`, `CANCEL`)
+- AI fallback parsing for single free-text WhatsApp reports
 
 **Use Cases**:
 - Urgent task notifications to volunteers
@@ -229,7 +232,9 @@ A comprehensive web-based platform designed to connect volunteers with community
 
 **Demo Credentials**:
 - Admin: `admin@saathi.com` / `Saathi@Admin2026!`
-- Volunteers & Citizens: Self-registration on respective portals
+- Demo Volunteer: `john@saathi.com` / `Volunteer@2026`
+- Demo Citizen: `citizen_demo` / `Citizen@2026`
+- Volunteers & Citizens can also self-register on respective portals
 
 ---
 
@@ -261,6 +266,79 @@ A comprehensive web-based platform designed to connect volunteers with community
 - Sub-second response time
 - Context-aware categorization
 - Consistency across multiple languages
+
+---
+
+### 15. **AI Auto-Planner & Dispatch Automation**
+**Description**: Automatically generates daily volunteer-task assignment plans from pending reports and available volunteers.
+
+**Capabilities**:
+- Auto-plans from pending reports with urgency-aware prioritization
+- Filters assignments by volunteer availability and nearby task radius
+- Persists generated assignments and updates report statuses
+- Generates volunteer-specific assignment views
+- Supports latest-plan retrieval and manual reassignment trigger endpoint
+- PDF export of generated plans from the frontend
+
+---
+
+### 16. **Route Planning & Optimization**
+**Description**: Computes optimized volunteer routes to reduce travel time and improve field productivity.
+
+**Capabilities**:
+- Nearest-neighbor route optimization fallback using Haversine distance
+- Optional Google Maps Directions API enhancement when API key is available
+- Distance and time estimation with per-task service time buffering
+- Volunteer route persistence with ordered route points
+- Route visualization on interactive maps in the Route Planner page
+
+---
+
+### 17. **Impact Zones, Heatmap & Crisis Prediction**
+**Description**: Displays impact hotspots and predicts near-term crisis urgency using zone-level signals.
+
+**Capabilities**:
+- Interactive impact heatmap using zone urgency and severity
+- AI prediction endpoint for next-7-day urgency, crisis type, skill recommendations, and confidence
+- Satellite/weather risk endpoint for location-level risk score and alert level
+- Critical-zone alerting in UI with ranked zone cards
+- Scheduled impact score updates through background cron jobs
+
+---
+
+### 18. **Multimodal Report Submission**
+**Description**: Supports multiple intake methods to capture incidents quickly and accurately.
+
+**Capabilities**:
+- Standard structured form with issue type and urgency slider
+- Browser geolocation capture with reverse geocoding fallback
+- Voice-to-text capture via Web Speech API
+- Image upload with OCR text extraction (Tesseract.js)
+- Unstructured WhatsApp/SMS-style text parsing through AI
+- Unified backend report creation for structured and unstructured inputs
+
+---
+
+### 19. **Resilient Data Layer (Cloud + Local Fallback)**
+**Description**: Ensures core flows remain functional even when MongoDB is unavailable.
+
+**Capabilities**:
+- Primary MongoDB persistence through Mongoose models
+- Automatic local JSON store fallback for reports, volunteers, and assignments
+- Seeded local demo data for quick startup and testing
+- Shared query/aggregation helpers working across MongoDB and fallback mode
+- Runtime Mongo readiness checks for graceful behavior switching
+
+---
+
+### 20. **Demo Bootstrap & Legacy Session Compatibility**
+**Description**: Improves onboarding and continuity with seeded demo accounts and migration-friendly session logic.
+
+**Capabilities**:
+- Auto-seeding of volunteer and citizen demo accounts on app startup
+- One-time seeding guard to avoid overwriting existing user data
+- Legacy localStorage key compatibility for session continuity
+- Role-aware session save/read/logout helpers for admin, volunteer, and citizen flows
 
 ---
 
@@ -297,28 +375,36 @@ A comprehensive web-based platform designed to connect volunteers with community
 ### Volunteer Management
 - `GET /api/volunteers` - List all volunteers
 - `POST /api/volunteers` - Register new volunteer
-- `GET /api/volunteers/:id` - Get volunteer details
-- `PUT /api/volunteers/:id` - Update volunteer profile
+- `DELETE /api/volunteers/:id` - Remove volunteer
 
 ### Report Management
 - `GET /api/reports` - List all reports
 - `POST /api/reports` - Submit new report
-- `GET /api/reports/:id` - Get report details
-- `PUT /api/reports/:id` - Update report status
-
-### Assignments
-- `GET /api/assignments` - View assignments
-- `POST /api/assignments` - Create assignment
-- `PUT /api/assignments/:id` - Update assignment status
+- `GET /api/reports/match/:reportId` - Get top volunteer matches for a report
 
 ### Dashboard
 - `GET /api/dashboard/stats` - Get dashboard statistics
-- `GET /api/dashboard/heatmap` - Get location heatmap data
-- `GET /api/dashboard/urgent` - Get urgent tasks
 
 ### AI Services
-- `POST /api/chat` - Chat with AI assistant
-- `POST /api/whatsapp/send` - Send WhatsApp message
+- `POST /api/chatbot/respond` - Chat with AI assistant
+- `POST /api/whatsapp/send` - Send outbound WhatsApp message
+- `POST /api/whatsapp/webhook` - Receive inbound WhatsApp events
+
+### Impact & Prediction
+- `GET /api/impact/heatmap` - Fetch impact zones for map view
+- `GET /api/impact/predict/:zoneId` - Generate AI prediction for a zone
+- `GET /api/impact/satellite/:lat/:lng` - Fetch weather-based risk signals
+
+### Route Optimization
+- `GET /api/routes/volunteer/:volunteerId` - Fetch saved optimized route for a volunteer
+- `POST /api/routes/optimize-all` - Trigger/return route optimization output
+- `GET /api/routes/cluster/:zoneId` - Zone route clustering endpoint
+
+### Auto-Planner
+- `POST /api/planner/run` - Run AI auto-planner
+- `GET /api/planner/latest` - Fetch latest generated plan
+- `GET /api/planner/volunteer/:id` - Fetch volunteer-specific assignment from latest plan
+- `PUT /api/planner/reassign` - Reassignment endpoint
 
 ---
 
