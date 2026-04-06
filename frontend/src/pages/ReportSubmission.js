@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Mic, MicOff, Upload, Send, FileText, Loader2, MapPin, Smartphone, X } from 'lucide-react';
+import { Mic, MicOff, Upload, Send, FileText, Loader2, Smartphone, X } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';

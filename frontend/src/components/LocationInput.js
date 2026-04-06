@@ -3,10 +3,8 @@ import { toast } from 'react-hot-toast';
 import { MapPin, LocateFixed, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import {
   getCurrentLocation,
-  reverseGeocodeCoordinates,
   forwardGeocodeAddress,
   isValidIndianCoordinates,
-  isLocationVerified,
 } from '../utils/locationValidation';
 
 /**
