@@ -18,7 +18,6 @@ const routesRoutes = require('./routes/routes');
 const plannerRoutes = require('./routes/planner');
 
 require('./jobs/updateImpactScores');
-
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();

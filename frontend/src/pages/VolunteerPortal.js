@@ -215,13 +215,13 @@ const VolunteerPortal = () => {
                 Recipient's Phone Number
               </label>
               <div className="relative">
-                <Phone className="absolute left-4 top-3.5 w-5 h-5 text-emerald-600" />
+                <Phone className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-emerald-600" />
                 <input
                   type="tel"
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
                   placeholder="Enter mobile number (e.g., 9876543210)"
-                  className="w-full h-12 pl-13 pr-4 rounded-xl border-2 border-emerald-300 bg-white text-slate-900 font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                  className="w-full h-12 rounded-xl border-2 border-emerald-300 bg-white pl-12 pr-4 text-slate-900 font-semibold placeholder:text-slate-400 transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <p className="mt-2 text-xs text-slate-600">Format: 10-digit Indian number (with or without +91 prefix)</p>
