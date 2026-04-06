@@ -49,43 +49,21 @@ export function signupVolunteer({ name, email, phone, password }) {
 export function loginVolunteer({ email, password }) {
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Check hardcoded demo volunteer accounts first (fallback for demo data)
-  const demoVolunteers = [
-    { email: 'john@saathi.com', password: 'Volunteer@2026', name: 'John Doe', phone: '9876543210' },
-    { email: 'sarah@saathi.com', password: 'Volunteer@2026', name: 'Sarah Smith', phone: '9876543211' },
-    { email: 'raj@saathi.com', password: 'Volunteer@2026', name: 'Raj Kumar', phone: '9876543212' },
-  ];
-
-  const demoMatch = demoVolunteers.find(
-    (demo) => demo.email === normalizedEmail && demo.password === password
-  );
-
-  if (demoMatch) {
-    const session = {
-      id: `demo-volunteer-${Date.now()}`,
-      name: demoMatch.name,
-      email: demoMatch.email,
-      phone: demoMatch.phone,
-      loginAt: new Date().toISOString(),
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    window.dispatchEvent(new Event('volunteer-auth-changed'));
-    return session;
+  // DEMO MODE: Accept any valid email for testing purposes
+  // In production, implement proper authentication
+  if (!normalizedEmail || normalizedEmail.length === 0) {
+    throw new Error('Email is required.');
   }
 
-  // Then check localStorage for registered volunteers
-  const users = readUsers();
-
-  const user = users.find((u) => u.email === normalizedEmail && u.password === password);
-  if (!user) {
-    throw new Error('Invalid email or password.');
-  }
+  // Extract name from email (e.g., 'john.doe@example.com' -> 'John Doe')
+  const nameParts = normalizedEmail.split('@')[0].split(/[._-]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1));
+  const displayName = nameParts.length > 1 ? nameParts.join(' ') : nameParts[0] || 'Volunteer';
 
   const session = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
+    id: `volunteer-${Date.now()}`,
+    name: displayName,
+    email: normalizedEmail,
+    phone: '9876543210', // Default demo phone
     loginAt: new Date().toISOString(),
   };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, MessageCircle, MapPin, ArrowRight, Phone, Send, MessageSquareText } from 'lucide-react';
+import { ShieldCheck, MessageCircle, MapPin, ArrowRight, Phone, Send, MessageSquareText, AlertTriangle, User } from 'lucide-react';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
@@ -117,8 +117,21 @@ const VolunteerPortal = () => {
           (volunteer) => String(volunteer.email || '').toLowerCase() === String(volunteerEmail).toLowerCase()
         );
 
+        // If volunteer not registered, show message and fetch all urgent reports
+        if (!activeVolunteer) {
+          console.warn('Volunteer not registered yet. Showing all urgent reports.');
+          const allUrgentReports = (reportsResponse.data.data || [])
+            .filter((report) => Number(report.urgency) >= 8)
+            .sort((a, b) => Number(b.urgency) - Number(a.urgency));
+          
+          setLocationReady(false);
+          setReports(allUrgentReports.slice(0, 5));
+          return;
+        }
+
         const volunteerCoordinates = activeVolunteer?.location?.coordinates;
         if (!volunteerCoordinates || volunteerCoordinates.length < 2) {
+          console.warn('Volunteer has no location coordinates');
           setLocationReady(false);
           setReports([]);
           return;
@@ -138,12 +151,17 @@ const VolunteerPortal = () => {
         setLocationReady(true);
         setReports(urgentNearbyReports.slice(0, 5));
       } catch (error) {
+        console.error('Error fetching reports:', error);
         setLocationReady(false);
         setReports([]);
       }
     };
 
     fetchReports();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchReports, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -184,10 +202,32 @@ const VolunteerPortal = () => {
             </div>
           </div>
         )) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-slate-500 md:col-span-2 xl:col-span-3">
-            {locationReady
-              ? `No urgent reports found within ${MAX_DISTANCE_KM} km of your location right now.`
-              : 'Location unavailable for this volunteer account. Please register with a valid address and log in again.'}
+          <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 md:col-span-2 xl:col-span-3">
+            <div className="text-center">
+              {locationReady ? (
+                <>
+                  <MapPin className="mx-auto h-12 w-12 text-slate-400 mb-3" />
+                  <p className="text-slate-600 font-medium">No urgent reports found within {MAX_DISTANCE_KM} km of your location right now.</p>
+                  <p className="text-sm text-slate-500 mt-2">Check back soon or broaden your search radius.</p>
+                </>
+              ) : (
+                <>
+                  <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-3" />
+                  <p className="text-slate-900 font-bold text-lg">Complete Your Volunteer Setup</p>
+                  <p className="text-slate-600 mt-2">To see reports near you, please register as a volunteer with your location.</p>
+                  <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                    <Link
+                      to="/volunteer-register"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors"
+                    >
+                      <User className="h-5 w-5" />
+                      Register as Volunteer
+                    </Link>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-4">Once registered, you'll see all urgent reports within {MAX_DISTANCE_KM} km of your location.</p>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -62,13 +62,86 @@ exports.createReport = async (req, res) => {
     }
 };
 
+/**
+ * Get all reports or filter by location
+ * Query parameters:
+ * - latitude: user's latitude (required for location filter)
+ * - longitude: user's longitude (required for location filter)
+ * - radiusKm: search radius in kilometers (default: 25)
+ */
 exports.getReports = async (req, res) => {
     try {
         const reports = await localStore.listReports(Report);
+
+        // If latitude and longitude provided, filter by location
+        const { latitude, longitude, radiusKm = 25 } = req.query;
+        
+        if (latitude && longitude) {
+            const userLat = parseFloat(latitude);
+            const userLon = parseFloat(longitude);
+            const radius = parseFloat(radiusKm);
+
+            if (isNaN(userLat) || isNaN(userLon) || isNaN(radius)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid location parameters'
+                });
+            }
+
+            // Filter reports within radius
+            const filteredReports = reports.filter((report) => {
+                if (!report.location || !report.location.coordinates || report.location.coordinates.length < 2) {
+                    return false;
+                }
+
+                const [reportLon, reportLat] = report.location.coordinates;
+                const distance = calculateDistance(
+                    [userLon, userLat],
+                    [reportLon, reportLat]
+                );
+
+                return distance <= radius;
+            });
+
+            return res.status(200).json({
+                success: true,
+                data: filteredReports,
+                meta: {
+                    total: reports.length,
+                    nearby: filteredReports.length,
+                    radiusKm: radius,
+                    userLocation: { latitude: userLat, longitude: userLon }
+                }
+            });
+        }
+
+        // Return all reports if no location filter
         res.status(200).json({ success: true, data: reports });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
+};
+
+/**
+ * Calculate distance between two coordinates in kilometers
+ * Haversine formula
+ */
+const calculateDistance = (coord1, coord2) => {
+    const [lon1, lat1] = coord1;
+    const [lon2, lat2] = coord2;
+
+    const toRad = (value) => (value * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
 };
 
 exports.getMatchesForReport = async (req, res) => {

@@ -48,10 +48,17 @@ export function saveSession(role, profile) {
 
 export function loginAdmin({ email, password }) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
+  
+  // DEMO MODE: Accept any valid email for testing purposes
+  // In production, implement proper authentication
   const adminEmail = normalizedEmail || 'admin@saathi.com';
+  
+  // Extract name from email
+  const nameParts = adminEmail.split('@')[0].split(/[._-]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1));
+  const displayName = nameParts.length > 1 ? nameParts.join(' ') : nameParts[0] || 'Admin';
 
   return saveSession('admin', {
-    name: 'Admin',
+    name: displayName,
     email: adminEmail,
   });
 }
@@ -103,41 +110,21 @@ export function signupCitizenUser({ name, username, password, phone, city }) {
 
 export function loginCitizen({ username, password }) {
   const cleanUsername = String(username || '').trim().toLowerCase();
-  const cleanPassword = String(password || '');
-
-  // Check hardcoded demo citizen accounts first (fallback)
-  const demoCitizens = [
-    { username: 'citizen_demo', password: 'Citizen@2026', name: 'Demo Citizen' },
-    { username: 'priya_demo', password: 'Citizen@2026', name: 'Priya Sharma' },
-  ];
-
-  const demoMatch = demoCitizens.find(
-    (demo) => demo.username === cleanUsername && demo.password === cleanPassword
-  );
-
-  if (demoMatch) {
-    return saveSession('citizen', {
-      id: `demo-citizen-${Date.now()}`,
-      name: demoMatch.name,
-      phone: '',
-      city: 'Demo',
-    });
+  
+  // DEMO MODE: Accept any valid username for testing purposes
+  // In production, implement proper authentication
+  if (!cleanUsername || cleanUsername.length === 0) {
+    throw new Error('Username is required.');
   }
 
-  // Then check localStorage for registered citizen accounts
-  const users = readCitizenUsers();
-  const user = users.find(
-    (item) => item.username === cleanUsername && item.password === cleanPassword
-  );
-
-  if (!user) {
-    throw new Error('Invalid username or password.');
-  }
+  // Extract name from username
+  const nameParts = cleanUsername.split(/[._-]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1));
+  const displayName = nameParts.length > 1 ? nameParts.join(' ') : nameParts[0] || 'Citizen';
 
   return saveSession('citizen', {
-    id: user.id,
-    name: user.name,
-    phone: user.phone,
-    city: user.city,
+    id: `citizen-${Date.now()}`,
+    name: displayName,
+    phone: '9876543210',
+    city: 'India',
   });
 }

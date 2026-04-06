@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Mic, MicOff, Upload, Send, FileText, Loader2, MapPin, Smartphone, X, LocateFixed } from 'lucide-react';
+import { Mic, MicOff, Upload, Send, FileText, Loader2, MapPin, Smartphone, X } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
+import LocationInput from '../components/LocationInput';
 import { apiUrl } from '../config/api';
 
 const ReportSubmission = () => {
@@ -11,8 +12,6 @@ const ReportSubmission = () => {
   const [loading, setLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
-  const [locating, setLocating] = useState(false);
-  const [locationAccuracy, setLocationAccuracy] = useState(null);
   const [selectedImageName, setSelectedImageName] = useState('');
   
   // Form State
@@ -23,7 +22,8 @@ const ReportSubmission = () => {
     address: '',
     longitude: 77.1025,
     latitude: 28.7041,
-    reportImage: ''
+    reportImage: '',
+    locationVerified: false
   });
 
   // WhatsApp Simulation State
@@ -96,60 +96,14 @@ const ReportSubmission = () => {
     setSelectedImageName('');
   };
 
-  const fetchBrowserLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported in this browser.');
-      return;
-    }
-
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        let resolvedAddress = '';
-
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
-            {
-              headers: {
-                Accept: 'application/json',
-              },
-            }
-          );
-
-          if (res.ok) {
-            const data = await res.json();
-            const a = data.address || {};
-            const city = a.city || a.town || a.village || a.hamlet || a.county || '';
-            const state = a.state || '';
-            const country = a.country || '';
-            resolvedAddress = [city, state, country].filter(Boolean).join(', ');
-          }
-        } catch (error) {
-          // Fall back to coordinates when reverse lookup is unavailable.
-        }
-
-        setFormData((prev) => ({
-          ...prev,
-          latitude,
-          longitude,
-          address: resolvedAddress || `Lat ${latitude.toFixed(6)}, Lng ${longitude.toFixed(6)}`,
-        }));
-        setLocationAccuracy(Math.round(accuracy));
-        setLocating(false);
-        toast.success('Current location fetched from browser.');
-      },
-      () => {
-        setLocating(false);
-        toast.error('Unable to fetch location. Please allow location permission.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
-      }
-    );
+  const handleLocationChange = (locationData) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      address: locationData.address,
+      locationVerified: locationData.isVerified || locationData.isGeocodedFromAddress,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -159,7 +113,11 @@ const ReportSubmission = () => {
       return;
     }
     if (!formData.address || !formData.address.trim()) {
-      toast.error('Address is required.');
+      toast.error('Location/Address is required.');
+      return;
+    }
+    if (!formData.locationVerified) {
+      toast.error('Location must be verified. Use "Use My Current Location" or "Enter Address".');
       return;
     }
     if (ocrLoading) {
@@ -176,9 +134,11 @@ const ReportSubmission = () => {
           address: formData.address
         }
       };
+      delete payload.locationVerified; // Remove from payload
+      
       await axios.post(apiUrl('/api/reports'), payload);
       toast.success('Report submitted successfully!');
-      setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041, reportImage: '' });
+      setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041, reportImage: '', locationVerified: false });
       setSelectedImageName('');
     } catch (error) {
       const errorMsg = error.response?.data?.message || 'Submission failed.';
@@ -263,34 +223,13 @@ const ReportSubmission = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700">Address / Location</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                  <input 
-                    type="text"
-                    placeholder="Enter address..."
-                    value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    className="w-full pl-10 rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
-                  />
-                </div>
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={fetchBrowserLocation}
-                    disabled={locating}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60 w-fit"
-                  >
-                    <LocateFixed className="w-4 h-4" />
-                    {locating ? 'Fetching location...' : 'Use My Current Location'}
-                  </button>
-                  <p className="text-xs text-slate-500">
-                    Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
-                    {locationAccuracy ? ` (${locationAccuracy}m accuracy)` : ''}
-                  </p>
-                </div>
-              </div>
+              <LocationInput
+                onLocationChange={handleLocationChange}
+                showCoordinates={true}
+                required={true}
+                label="Location / Address"
+                readOnly={false}
+              />
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">

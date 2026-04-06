@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { User, Phone, Mail, MapPin, CheckCircle2, Loader2, Camera, X, LocateFixed, Lock } from 'lucide-react';
+import { User, Phone, Mail, CheckCircle2, Loader2, Camera, X, Lock } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
+import LocationInput from '../components/LocationInput';
 import { signupVolunteer } from '../utils/volunteerAuth';
 import { apiUrl } from '../config/api';
 
 const VolunteerRegistration = () => {
   const [loading, setLoading] = useState(false);
-  const [locating, setLocating] = useState(false);
-  const [locationAccuracy, setLocationAccuracy] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -22,6 +21,7 @@ const VolunteerRegistration = () => {
     longitude: 77.1025,
     latitude: 28.7041,
     profileImage: '',
+    locationVerified: false,
     availability: {
       days: [],
       times: ['Morning', 'Afternoon']
@@ -49,60 +49,14 @@ const VolunteerRegistration = () => {
     setFormData({ ...formData, profileImage: '' });
   };
 
-  const fetchBrowserLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation is not supported in this browser.');
-      return;
-    }
-
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        let resolvedAddress = '';
-
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`,
-            {
-              headers: {
-                Accept: 'application/json',
-              },
-            }
-          );
-
-          if (res.ok) {
-            const data = await res.json();
-            const a = data.address || {};
-            const city = a.city || a.town || a.village || a.hamlet || a.county || '';
-            const state = a.state || '';
-            const country = a.country || '';
-            resolvedAddress = [city, state, country].filter(Boolean).join(', ');
-          }
-        } catch (error) {
-          // Fall back to coordinates when reverse lookup is unavailable.
-        }
-
-        setFormData((prev) => ({
-          ...prev,
-          latitude,
-          longitude,
-          address: resolvedAddress || `Lat ${latitude.toFixed(6)}, Lng ${longitude.toFixed(6)}`,
-        }));
-        setLocationAccuracy(Math.round(accuracy));
-        setLocating(false);
-        toast.success('Current location fetched from browser.');
-      },
-      () => {
-        setLocating(false);
-        toast.error('Unable to fetch location. Please allow location permission.');
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
-      }
-    );
+  const handleLocationChange = (locationData) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      address: locationData.address,
+      locationVerified: locationData.isVerified || locationData.isGeocodedFromAddress,
+    }));
   };
 
   const skillsOptions = ['Medical', 'Food Distribution', 'Education', 'Construction', 'Logistics', 'Counseling', 'Tech Support', 'Transportation'];
@@ -134,6 +88,11 @@ const VolunteerRegistration = () => {
       return;
     }
 
+    if (!formData.locationVerified) {
+      toast.error('Location must be verified. Use "Use My Current Location" or "Enter Address".');
+      return;
+    }
+
     setLoading(true);
     try {
       signupVolunteer({
@@ -143,7 +102,7 @@ const VolunteerRegistration = () => {
         password: formData.password,
       });
 
-      const { password, confirmPassword, ...volunteerProfile } = formData;
+      const { password, confirmPassword, locationVerified, ...volunteerProfile } = formData;
       const payload = {
         ...volunteerProfile,
         location: {
@@ -163,6 +122,7 @@ const VolunteerRegistration = () => {
         address: '',
         longitude: 77.1025,
         latitude: 28.7041,
+        locationVerified: false,
         availability: { days: [], times: ['Morning'] }
       });
       setPhotoPreview(null);
@@ -312,34 +272,13 @@ const VolunteerRegistration = () => {
           <div className="space-y-6">
              <div className="space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-2">Location</h3>
-                <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Address</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                    <input 
-                      type="text" required
-                      value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
-                      className="w-full pl-10 rounded-lg border-slate-200 focus:ring-primary-500 focus:border-primary-500"
-                      placeholder="Street, City, Zip"
-                    />
-                  </div>
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
-                    <button
-                      type="button"
-                      onClick={fetchBrowserLocation}
-                      disabled={locating}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60 w-fit"
-                    >
-                      <LocateFixed className="w-4 h-4" />
-                      {locating ? 'Fetching location...' : 'Use My Current Location'}
-                    </button>
-                    <p className="text-xs text-slate-500">
-                      Coordinates: {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
-                      {locationAccuracy ? ` (${locationAccuracy}m accuracy)` : ''}
-                    </p>
-                  </div>
-                </div>
+                <LocationInput
+                  onLocationChange={handleLocationChange}
+                  showCoordinates={true}
+                  required={true}
+                  label="Service Location"
+                  readOnly={false}
+                />
              </div>
 
              <div className="space-y-4">

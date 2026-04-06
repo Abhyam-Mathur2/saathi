@@ -3,6 +3,9 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+const Report = require('./models/Report');
+const Volunteer = require('./models/Volunteer');
+
 console.log('Environment Variables Check:');
 console.log('- PORT:', process.env.PORT);
 console.log('- MONGODB_URI:', process.env.MONGODB_URI ? 'SET' : 'MISSING');
@@ -61,6 +64,39 @@ app.get('/whatsapp/health', (req, res) => {
         success: true,
         message: 'Saathi WhatsApp service is healthy',
     });
+});
+
+// Seed sample data for testing location filtering
+app.post('/api/seed', async (req, res) => {
+    try {
+        const { sampleVolunteers, sampleReports } = require('./seedSampleData');
+        
+        // Clear existing data
+        await Promise.all([
+            Volunteer.deleteMany({}),
+            Report.deleteMany({})
+        ]);
+
+        // Seed volunteers
+        const createdVolunteers = await Volunteer.insertMany(sampleVolunteers);
+        
+        // Seed reports
+        const createdReports = await Report.insertMany(sampleReports);
+
+        res.json({
+            success: true,
+            message: 'Sample data seeded successfully',
+            volunteers: createdVolunteers.length,
+            reports: createdReports.length
+        });
+    } catch (error) {
+        console.error('Seed error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to seed data',
+            error: error.message
+        });
+    }
 });
 
 // Root route
