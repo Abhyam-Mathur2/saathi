@@ -46,10 +46,22 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/volunteers', volunteerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
+app.use('/whatsapp', whatsappRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/impact', impactRoutes);
 app.use('/api/routes', routesRoutes);
 app.use('/api/planner', plannerRoutes);
+
+app.get('/whatsapp/webhook', (req, res) => {
+    res.status(200).send('Saathi WhatsApp webhook is live. Use POST from Twilio.');
+});
+
+app.get('/whatsapp/health', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'Saathi WhatsApp service is healthy',
+    });
+});
 
 // Root route
 app.get('/', (req, res) => {

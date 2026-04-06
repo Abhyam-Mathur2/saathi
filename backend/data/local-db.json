@@ -4,6 +4,50 @@
       "location": {
         "type": "Point",
         "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "issueType": "Other",
+      "urgency": 1,
+      "description": "Unknown issue, no details provided",
+      "aiAnalysis": {
+        "reasoning": "Insufficient information to assess the issue, but categorizing as Other due to lack of details"
+      },
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "test message from local diagnostics",
+      "status": "Pending",
+      "_id": "621d53a3-336b-490f-8537-c70e904c37f9",
+      "createdAt": "2026-04-06T10:15:10.230Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.0066,
+          28.6441
+        ],
+        "address": "Unknown"
+      },
+      "issueType": "Other",
+      "urgency": 2,
+      "description": "Unidentified community need report. Details are unavailable.",
+      "aiAnalysis": {
+        "reasoning": "The report does not contain relevant keywords to categorize the issue type or identify the location. Therefore, AI is unable to analyze or provide further assistance."
+      },
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "test message from local diagnostics",
+      "status": "Pending",
+      "_id": "e0d1b31e-4acc-4078-890f-941e4c3c1b75",
+      "createdAt": "2026-04-06T10:15:02.725Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
           77.123,
           28.123
         ],
