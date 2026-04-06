@@ -67,19 +67,29 @@ export const reverseGeocodeCoordinates = async (latitude, longitude) => {
     const data = await response.json();
     const address = data.address || {};
 
-    // Extract meaningful address parts
-    const city = address.city || address.town || address.village || address.hamlet || '';
-    const district = address.county || address.district || '';
+    // Extract meaningful address parts; include more granular locality fallbacks.
+    const locality =
+      address.suburb ||
+      address.neighbourhood ||
+      address.quarter ||
+      address.road ||
+      address.city_district ||
+      '';
+    const city = address.city || address.town || address.village || address.hamlet || address.municipality || '';
+    const district = address.county || address.district || address.state_district || '';
     const state = address.state || '';
     const country = address.country || '';
 
-    const formattedAddress = [city, district, state, country].filter(Boolean).join(', ');
+    const formattedAddress = [locality, city, district, state, country]
+      .filter(Boolean)
+      .join(', ');
+    const displayName = String(data.display_name || '').trim();
 
     return {
       success: true,
-      address: formattedAddress,
-      displayAddress: formattedAddress || `Lat ${latitude.toFixed(6)}, Lng ${longitude.toFixed(6)}`,
-      components: { city, district, state, country },
+      address: formattedAddress || displayName,
+      displayAddress: formattedAddress || displayName || `Lat ${latitude.toFixed(6)}, Lng ${longitude.toFixed(6)}`,
+      components: { locality, city, district, state, country },
     };
   } catch (error) {
     console.error('Reverse geocoding error:', error);
