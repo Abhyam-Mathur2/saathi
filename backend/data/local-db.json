@@ -1,6 +1,100 @@
 {
   "reports": [
     {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.123,
+          28.123
+        ],
+        "address": "Unknown Address"
+      },
+      "issueType": "Infrastructure",
+      "urgency": 6,
+      "description": "Water logging in streets due to heavy rain or clogged drainage system",
+      "aiAnalysis": {
+        "reasoning": "Based on the given text, we infer that the issue is related to infrastructure, specifically related to water management due to heavy rain. The urgency level is set to 6 as it may cause inconvenience to the public but doesn't pose an immediate life threat."
+      },
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "Water logging in street",
+      "status": "Pending",
+      "_id": "765e77a6-de2d-4c15-8724-dae21e328017",
+      "createdAt": "2026-04-06T09:17:23.258Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          74.8231,
+          18.9399
+        ],
+        "address": "India (estimated)"
+      },
+      "issueType": "Infrastructure",
+      "urgency": 7,
+      "description": "Waterlogging has been reported on streets, posing a risk to commuters and pedestrians.",
+      "aiAnalysis": {
+        "reasoning": "Based on the reported issue of 'Water logging in street', AI has inferred that the issue is related to Infrastructure and hence assigned high urgency"
+      },
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "Water logging in street",
+      "status": "Pending",
+      "_id": "29273bd3-27c0-4814-a7c0-54ef489c799a",
+      "createdAt": "2026-04-06T09:17:16.891Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          7820
+        ],
+        "address": "Unknown"
+      },
+      "issueType": "Other",
+      "urgency": 0,
+      "description": "",
+      "aiAnalysis": null,
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "START",
+      "status": "Pending",
+      "_id": "65cff799-6e0c-4999-84cd-cd924e6e5abd",
+      "createdAt": "2026-04-06T09:17:16.074Z"
+    },
+    {
+      "issue": {
+        "location": {
+          "coordinates": [
+            77.0963,
+            28.6444
+          ],
+          "address": "New Delhi, India"
+        },
+        "issueType": "Other",
+        "urgency": 5,
+        "description": "Unable to gather more information due to a lack of context.",
+        "aiAnalysis": {
+          "reasoning": "Not enough data to infer a specific issue type."
+        }
+      },
+      "isUnstructured": true,
+      "source": "whatsapp",
+      "originalText": "START",
+      "status": "Pending",
+      "_id": "d0db9ce2-4953-40c5-adf9-8f7da8afc130",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.1025,
+          28.7041
+        ],
+        "address": "Unknown"
+      },
+      "createdAt": "2026-04-06T09:14:59.633Z"
+    },
+    {
       "isUnstructured": true,
       "text": "muje help chaiye yaha medicines ki kami h",
       "location": {

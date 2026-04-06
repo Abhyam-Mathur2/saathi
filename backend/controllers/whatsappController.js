@@ -3,6 +3,48 @@ const Report = require('../models/Report');
 const groqService = require('../services/groqService');
 const localStore = require('../services/localStore');
 
+const ISSUE_TYPES = ['Food', 'Health', 'Education', 'Infrastructure', 'Safety', 'Environment', 'Other'];
+const DEFAULT_COORDINATES = [77.1025, 28.7041];
+const activeConversations = new Map();
+
+const canonicalIssueType = (value) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  const match = ISSUE_TYPES.find((issue) => issue.toLowerCase() === normalized);
+  return match || null;
+};
+
+const parseUrgency = (value) => {
+  const numeric = Number.parseInt(String(value || '').trim(), 10);
+  if (Number.isNaN(numeric) || numeric < 1 || numeric > 10) {
+    return null;
+  }
+  return numeric;
+};
+
+const startGuidedFlow = (sender) => {
+  activeConversations.set(sender, {
+    step: 'description',
+    data: {
+      issueType: 'Other',
+      urgency: 5,
+      address: 'Unknown location',
+    },
+  });
+};
+
+const clearGuidedFlow = (sender) => {
+  activeConversations.delete(sender);
+};
+
+const isGuidedStartCommand = (message) => {
+  const normalized = String(message || '').trim().toUpperCase();
+  return normalized === 'START' || normalized === 'REGISTER' || normalized === 'REPORT';
+};
+
 const normalizePhoneForWhatsApp = (phone) => {
   const raw = String(phone || '').trim();
   if (!raw) {
@@ -65,13 +107,118 @@ exports.webhook = async (req, res) => {
   const twiml = new twilio.twiml.MessagingResponse();
 
   try {
+    const sender = String(req.body.From || '').trim();
+    const destination = String(req.body.To || '').trim();
     const incomingText = (req.body.Body || '').trim();
+    const command = incomingText.toUpperCase();
 
-    if (!incomingText) {
-      twiml.message('Please send a message describing the community need.');
+    // Process only messages targeting the configured WhatsApp number.
+    const configuredNumber = String(process.env.TWILIO_WHATSAPP_NUMBER || '').trim();
+    if (configuredNumber && destination && configuredNumber !== destination) {
+      twiml.message('This bot is not enabled for this number. Please message the configured Saathi WhatsApp number.');
       return res.type('text/xml').status(200).send(twiml.toString());
     }
 
+    if (!incomingText) {
+      twiml.message('Please type START to register a problem step-by-step, or send a free-text problem description directly.');
+      return res.type('text/xml').status(200).send(twiml.toString());
+    }
+
+    if (command === 'HELP') {
+      twiml.message(
+        [
+          'Saathi WhatsApp Bot',
+          'Type START to register a new problem in guided mode.',
+          'Type RESET to cancel current guided flow.',
+          'Or send one free-text message and I will auto-register it using AI.',
+        ].join(' ')
+      );
+      return res.type('text/xml').status(200).send(twiml.toString());
+    }
+
+    if (command === 'RESET' || command === 'CANCEL') {
+      clearGuidedFlow(sender);
+      twiml.message('Your current registration flow was cleared. Type START to begin again.');
+      return res.type('text/xml').status(200).send(twiml.toString());
+    }
+
+    if (isGuidedStartCommand(incomingText)) {
+      startGuidedFlow(sender);
+      twiml.message('Let us register your problem. Step 1/4: Please describe the issue in detail.');
+      return res.type('text/xml').status(200).send(twiml.toString());
+    }
+
+    const guidedFlow = activeConversations.get(sender);
+    if (guidedFlow) {
+      if (guidedFlow.step === 'description') {
+        guidedFlow.data.description = incomingText;
+        guidedFlow.step = 'issueType';
+        activeConversations.set(sender, guidedFlow);
+        twiml.message(`Step 2/4: Enter issue type from: ${ISSUE_TYPES.join(', ')}.`);
+        return res.type('text/xml').status(200).send(twiml.toString());
+      }
+
+      if (guidedFlow.step === 'issueType') {
+        const issueType = canonicalIssueType(incomingText);
+        if (!issueType) {
+          twiml.message(`Invalid issue type. Please choose one of: ${ISSUE_TYPES.join(', ')}.`);
+          return res.type('text/xml').status(200).send(twiml.toString());
+        }
+
+        guidedFlow.data.issueType = issueType;
+        guidedFlow.step = 'urgency';
+        activeConversations.set(sender, guidedFlow);
+        twiml.message('Step 3/4: Enter urgency from 1 to 10 (10 = most urgent).');
+        return res.type('text/xml').status(200).send(twiml.toString());
+      }
+
+      if (guidedFlow.step === 'urgency') {
+        const urgency = parseUrgency(incomingText);
+        if (!urgency) {
+          twiml.message('Invalid urgency. Please send a number between 1 and 10.');
+          return res.type('text/xml').status(200).send(twiml.toString());
+        }
+
+        guidedFlow.data.urgency = urgency;
+        guidedFlow.step = 'address';
+        activeConversations.set(sender, guidedFlow);
+        twiml.message('Step 4/4: Please send address/locality (example: Malviya Nagar, New Delhi).');
+        return res.type('text/xml').status(200).send(twiml.toString());
+      }
+
+      if (guidedFlow.step === 'address') {
+        guidedFlow.data.address = incomingText;
+
+        const reportPayload = {
+          issueType: guidedFlow.data.issueType,
+          urgency: guidedFlow.data.urgency,
+          description: guidedFlow.data.description,
+          location: {
+            type: 'Point',
+            coordinates: DEFAULT_COORDINATES,
+            address: guidedFlow.data.address,
+          },
+          isUnstructured: false,
+          source: 'whatsapp',
+          originalText: guidedFlow.data.description,
+          status: 'Pending',
+        };
+
+        const report = await localStore.createReport(reportPayload, Report);
+        clearGuidedFlow(sender);
+
+        twiml.message(
+          [
+            'Your problem has been registered successfully.',
+            `Report ID: ${report._id}.`,
+            'Thank you. Our team will review it shortly.',
+          ].join(' ')
+        );
+        return res.type('text/xml').status(200).send(twiml.toString());
+      }
+    }
+
+    // Fallback mode: one free-text message is parsed by AI and registered as a report.
     const aiData = await groqService.parseUnstructuredText(incomingText);
     const reportPayload = {
       ...aiData,
