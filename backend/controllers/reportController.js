@@ -86,3 +86,28 @@ exports.getMatchesForReport = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+exports.completeReport = async (req, res) => {
+  try {
+    const { completionPhoto, note } = req.body;
+    const report = await localStore.updateReport(req.params.reportId, {
+      status: 'Resolved',
+      completionPhoto,
+      completionNote: note,
+      resolvedAt: new Date().toISOString()
+    }, Report);
+    res.status(200).json({ success: true, data: report });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.analyzeImage = async (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+    const analysis = await groqService.analyzeReportImage(imageBase64);
+    res.status(200).json({ success: true, data: analysis });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Bot, FileText, LocateFixed, MessageCircle, Phone, HeartHandshake, ArrowRight } from 'lucide-react';
+import { Bot, FileText, LocateFixed, MessageCircle, Phone, HeartHandshake, ArrowRight, ShieldAlert } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import ReportSubmission from './ReportSubmission';
 import ChatbotWidget from '../components/ChatbotWidget';
@@ -13,27 +13,11 @@ const normalizeIndianWhatsAppNumber = (value) => {
   if (!digits) {
     return null;
   }
-
-  if (digits.startsWith('00')) {
-    digits = digits.slice(2);
-  }
-
-  if (digits.startsWith('091')) {
-    digits = `91${digits.slice(3)}`;
-  }
-
-  if (digits.length === 11 && digits.startsWith('0')) {
-    digits = `91${digits.slice(1)}`;
-  }
-
-  if (digits.length === 10) {
-    digits = `91${digits}`;
-  }
-
-  if (!digits.startsWith('91') || digits.length !== 12) {
-    return null;
-  }
-
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('091')) digits = `91${digits.slice(3)}`;
+  if (digits.length === 11 && digits.startsWith('0')) digits = `91${digits.slice(1)}`;
+  if (digits.length === 10) digits = `91${digits}`;
+  if (!digits.startsWith('91') || digits.length !== 12) return null;
   return `+${digits}`;
 };
 
@@ -102,64 +86,98 @@ const CitizenPortal = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
-      <div>
-        <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Citizen workspace</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">Report issues and ask the chatbot</h1>
-        <p className="mt-2 text-slate-600">Citizens can submit community needs, capture location from the browser, and get AI help.</p>
+    <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-10">
+      {/* Header Section */}
+      <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-wider text-primary-600 mb-2">Citizen Workspace</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 font-heading">Report issues and ask the chatbot</h1>
+          <p className="mt-2 text-slate-600 max-w-2xl text-lg">Citizens can submit community needs, capture location from the browser, and get AI help.</p>
+        </div>
+        <button
+          onClick={() => navigate('/emergency')}
+          className="flex-shrink-0 animate-pulse-slow inline-flex items-center gap-2 bg-rose-600 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-rose-200 hover:bg-rose-700 transition-colors"
+        >
+          <ShieldAlert className="w-5 h-5" />
+          Emergency Alert
+        </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary-50 p-3 text-primary-600">
-              <FileText className="h-5 w-5" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left main grid (Takes 2/3 width on large screens) */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="rounded-3xl border border-primary-100 bg-gradient-to-b from-primary-50 to-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="rounded-2xl bg-white shadow-sm border border-primary-100 p-3 text-primary-600">
+                <FileText className="h-6 w-6" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Report a Need</h2>
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">Report a Need</h2>
+            <p className="text-slate-600">Use the form below to submit a community issue with photo and precise browser location.</p>
           </div>
-          <p className="mt-3 text-sm text-slate-600">Use the form below to submit a community issue with photo and precise browser location.</p>
+
+          <div className="rounded-3xl border border-emerald-100 bg-gradient-to-b from-emerald-50 to-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="rounded-2xl bg-white shadow-sm border border-emerald-100 p-3 text-emerald-600">
+                <Bot className="h-6 w-6" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Ask the chatbot</h2>
+            </div>
+            <p className="text-slate-600 mb-5">Ask how to report, what happens next, or what category to choose.</p>
+            <button
+              type="button"
+              onClick={openChatbot}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-700 shadow-md shadow-emerald-200 transition-colors cursor-pointer"
+            >
+              <Bot className="h-5 w-5" /> Open Chatbot
+            </button>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="rounded-2xl bg-slate-50 border border-slate-100 p-3 text-slate-700">
+                <LocateFixed className="h-6 w-6" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Browser location</h2>
+            </div>
+            <p className="text-slate-600">The app can fetch city/locality from your browser location when you allow permission.</p>
+          </div>
+
+          <div className="rounded-3xl border border-accent-100 bg-gradient-to-b from-accent-50 to-white p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="rounded-2xl bg-white border border-accent-100 shadow-sm p-3 text-accent-600">
+                <HeartHandshake className="h-6 w-6" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Become a Volunteer</h2>
+            </div>
+            <p className="text-slate-600 flex-1">If you want to help others too, create a volunteer profile from here and join the help network.</p>
+            <button
+              type="button"
+              onClick={becomeVolunteer}
+              className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-accent-600 px-4 py-3 text-sm font-bold text-white hover:bg-accent-700 shadow-md shadow-accent-200 transition-colors"
+            >
+              Join as Volunteer <ArrowRight className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
-              <Bot className="h-5 w-5" />
+        {/* Right side panel (Takes 1/3 width) */}
+        <div className="lg:col-span-1 border border-emerald-200 bg-gradient-to-b from-emerald-100/50 to-emerald-50 rounded-3xl p-6 shadow-sm flex flex-col justify-center">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="rounded-2xl bg-white border border-emerald-200 shadow-sm p-3 text-emerald-600">
+              <MessageCircle className="h-6 w-6" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">Ask the chatbot</h2>
-          </div>
-          <p className="mt-3 text-sm text-slate-600">Ask how to report, what happens next, or what category to choose.</p>
-          <button
-            type="button"
-            onClick={openChatbot}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
-            <Bot className="h-4 w-4" /> Open Chatbot
-          </button>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-slate-100 p-3 text-slate-700">
-              <LocateFixed className="h-5 w-5" />
-            </div>
-            <h2 className="text-lg font-semibold text-slate-900">Browser location</h2>
-          </div>
-          <p className="mt-3 text-sm text-slate-600">The app can fetch city/locality from your browser location when you allow permission.</p>
-        </div>
-
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="rounded-xl bg-emerald-100 p-3 text-emerald-600">
-              <MessageCircle className="h-5 w-5" />
-            </div>
-            <h2 className="text-lg font-semibold text-slate-900">WhatsApp Updates</h2>
+            <h2 className="text-xl font-bold text-slate-900">WhatsApp Updates</h2>
           </div>
           
-          <p className="text-sm text-slate-700 mb-4 font-medium">Get real-time updates via WhatsApp. Enter your phone number to receive volunteer assignments and status updates.</p>
+          <p className="text-slate-700 mb-6 font-medium leading-relaxed">
+            Get real-time updates via WhatsApp. Enter your phone number to receive volunteer assignments and status updates.
+          </p>
           
-          <div className="space-y-3">
+          <div className="space-y-4 bg-white p-5 rounded-2xl shadow-sm border border-emerald-100">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                 Your Phone Number
               </label>
               <div className="relative">
@@ -168,45 +186,30 @@ const CitizenPortal = () => {
                   type="tel"
                   value={whatsAppNumber}
                   onChange={(e) => setWhatsAppNumber(e.target.value)}
-                  placeholder="Enter mobile number (e.g., 9876543210)"
-                  className="w-full h-12 rounded-xl border-2 border-emerald-300 bg-white pl-12 pr-4 text-slate-900 font-semibold placeholder:text-slate-400 transition-all focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  placeholder="(e.g., 9876543210)"
+                  className="w-full h-12 rounded-xl border border-emerald-200 bg-emerald-50/30 pl-11 pr-4 text-slate-900 font-bold placeholder:text-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all outline-none"
                 />
               </div>
-              <p className="mt-2 text-xs text-slate-600">Format: 10-digit Indian number (with or without +91 prefix)</p>
+              <p className="mt-2 text-[11px] text-slate-500">Format: 10-digit Indian number (with or without +91 prefix)</p>
             </div>
             
             <button
               type="button"
               onClick={sendWhatsAppMessage}
               disabled={sendingWhatsApp || !whatsAppNumber.trim()}
-              className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+              className="w-full h-12 inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 font-bold text-white hover:bg-[#1DA851] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-[#25D366]/30"
             >
               <MessageCircle className="h-5 w-5" />
               {sendingWhatsApp ? 'Sending Message...' : 'Send WhatsApp Message'}
             </button>
             
-            <p className="text-xs text-emerald-700 bg-emerald-100 rounded-lg p-2 text-center">
-              💬 Tap to open WhatsApp and send your message via Twilio
-            </p>
+            <div className="bg-emerald-50 text-emerald-800 text-xs font-medium p-3 rounded-xl border border-emerald-100 flex gap-2 items-start">
+              <span className="text-base leading-none mt-0.5">💬</span>
+              <span>Tap to open WhatsApp and send your message via Twilio</span>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-primary-50 p-3 text-primary-600">
-              <HeartHandshake className="h-5 w-5" />
-            </div>
-            <h2 className="text-lg font-semibold text-slate-900">Become a Volunteer</h2>
-          </div>
-          <p className="mt-3 text-sm text-slate-600">If you want to help others too, create a volunteer profile from here and join the help network.</p>
-          <button
-            type="button"
-            onClick={becomeVolunteer}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700"
-          >
-            Join as Volunteer <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
       </div>
 
       <ReportSubmission />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Lock, Loader2, Copy, Check } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginVolunteer } from '../utils/volunteerAuth';
+import { saveSession } from '../utils/roleAuth';
 
 const VolunteerLogin = () => {
   const navigate = useNavigate();
@@ -23,8 +24,10 @@ const VolunteerLogin = () => {
     try {
       setLoading(true);
       const session = loginVolunteer(formData);
+      // Save into the shared roleAuth session so ProtectedRoute works
+      saveSession('volunteer', session);
       toast.success(`Welcome back, ${session.name}!`);
-      navigate('/register');
+      navigate('/volunteer');
     } catch (error) {
       toast.error(error.message || 'Login failed.');
     } finally {
@@ -75,11 +78,11 @@ const VolunteerLogin = () => {
             className="w-full py-3 bg-primary-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-primary-700 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-            Login
+            Login as Volunteer
           </button>
 
           <div className="rounded-xl border border-blue-300 bg-blue-50 p-4 text-blue-900 mt-4">
-            <p className="font-semibold text-sm mb-3">✅ Demo Volunteer Credentials (Auto-seeded):</p>
+            <p className="font-semibold text-sm mb-3">Demo Volunteer Credentials:</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-blue-200">
                 <div>
@@ -119,12 +122,20 @@ const VolunteerLogin = () => {
           </div>
         </form>
 
-        <p className="text-sm text-slate-500 text-center mt-6">
-          New volunteer?{' '}
-          <Link to="/volunteer/signup" className="font-semibold text-primary-600 hover:text-primary-700">
-            Create an account
-          </Link>
-        </p>
+        <div className="mt-6 space-y-3 text-center">
+          <p className="text-sm text-slate-500">
+            New volunteer?{' '}
+            <Link to="/volunteer/signup" className="font-semibold text-primary-600 hover:text-primary-700">
+              Create an account
+            </Link>
+          </p>
+          <p className="text-sm text-slate-500">
+            Are you an admin?{' '}
+            <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">
+              Admin Login
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

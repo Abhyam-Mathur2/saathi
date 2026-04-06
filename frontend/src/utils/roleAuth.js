@@ -2,6 +2,7 @@ const SESSION_KEY = 'saathi.activeSession';
 const LEGACY_SESSION_KEY = 'volunteerIQ.activeSession';
 const CITIZEN_USERS_KEY = 'saathi.citizenUsers';
 const LEGACY_CITIZEN_USERS_KEY = 'volunteerIQ.citizenUsers';
+const ADMIN_USERS_KEY = 'saathi.adminUsers';
 
 function readSession() {
   const raw = localStorage.getItem(SESSION_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
@@ -22,12 +23,22 @@ function writeCitizenUsers(users) {
   localStorage.setItem(CITIZEN_USERS_KEY, JSON.stringify(users));
 }
 
+function readAdminUsers() {
+  const raw = localStorage.getItem(ADMIN_USERS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function writeAdminUsers(users) {
+  localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(users));
+}
+
 export function getSession() {
   return readSession();
 }
 
 export function logoutSession() {
   localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('saathi.activeRole');
   window.dispatchEvent(new Event('role-auth-changed'));
 }
 
@@ -39,6 +50,7 @@ export function saveSession(role, profile) {
     email: profile.email || '',
     phone: profile.phone || '',
     city: profile.city || '',
+    ngoName: profile.ngoName || '',
     loginAt: new Date().toISOString(),
   };
 
@@ -46,15 +58,84 @@ export function saveSession(role, profile) {
   return session;
 }
 
+// ─── Admin Auth ──────────────────────────────────────────────
+
+export function signupAdmin({ name, email, password, ngoName }) {
+  const cleanName = String(name || '').trim();
+  const cleanEmail = String(email || '').trim().toLowerCase();
+  const cleanPassword = String(password || '');
+  const cleanNgoName = String(ngoName || '').trim();
+
+  if (!cleanName) throw new Error('Name is required.');
+  if (!cleanEmail || cleanEmail.length < 3) throw new Error('A valid email is required.');
+  if (cleanPassword.length < 6) throw new Error('Password must be at least 6 characters.');
+  if (!cleanNgoName) throw new Error('NGO name is required.');
+
+  const admins = readAdminUsers();
+  const exists = admins.some((a) => a.email === cleanEmail);
+  if (exists) throw new Error('An admin account with this email already exists.');
+
+  const newAdmin = {
+    id: crypto.randomUUID(),
+    name: cleanName,
+    email: cleanEmail,
+    password: cleanPassword,
+    ngoName: cleanNgoName,
+    createdAt: new Date().toISOString(),
+  };
+
+  admins.push(newAdmin);
+  writeAdminUsers(admins);
+
+  return {
+    id: newAdmin.id,
+    name: newAdmin.name,
+    email: newAdmin.email,
+    ngoName: newAdmin.ngoName,
+  };
+}
+
 export function loginAdmin({ email, password }) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
-  const adminEmail = normalizedEmail || 'admin@saathi.com';
+  const cleanPassword = String(password || '');
+
+  // Check hardcoded demo admin account first
+  const demoAdmins = [
+    { email: 'admin@saathi.com', password: 'Admin@2026', name: 'Admin', ngoName: 'Saathi HQ' },
+  ];
+
+  const demoMatch = demoAdmins.find(
+    (demo) => demo.email === normalizedEmail && demo.password === cleanPassword
+  );
+
+  if (demoMatch) {
+    return saveSession('admin', {
+      id: `demo-admin-${Date.now()}`,
+      name: demoMatch.name,
+      email: demoMatch.email,
+      ngoName: demoMatch.ngoName,
+    });
+  }
+
+  // Then check localStorage for registered admin accounts
+  const admins = readAdminUsers();
+  const admin = admins.find(
+    (a) => a.email === normalizedEmail && a.password === cleanPassword
+  );
+
+  if (!admin) {
+    throw new Error('Invalid admin email or password.');
+  }
 
   return saveSession('admin', {
-    name: 'Admin',
-    email: adminEmail,
+    id: admin.id,
+    name: admin.name,
+    email: admin.email,
+    ngoName: admin.ngoName,
   });
 }
+
+// ─── Citizen Auth ────────────────────────────────────────────
 
 export function signupCitizenUser({ name, username, password, phone, city }) {
   const cleanName = String(name || '').trim();

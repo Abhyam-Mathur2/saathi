@@ -6,13 +6,26 @@
 export function seedDemoAccounts() {
   const VOLUNTEER_USERS_KEY = 'saathi.users';
   const CITIZEN_USERS_KEY = 'saathi.citizenUsers';
-  const DEMO_SEEDED_FLAG = 'saathi.demoSeededFlag';
+  const ADMIN_USERS_KEY = 'saathi.adminUsers';
+  const DEMO_SEEDED_FLAG = 'saathi.demoSeededV2';
 
   // Check if demo accounts are already seeded
   const alreadySeeded = localStorage.getItem(DEMO_SEEDED_FLAG);
   if (alreadySeeded) {
     return; // Demo accounts already seeded, skip
   }
+
+  // Seed demo admin accounts
+  const demoAdmins = [
+    {
+      id: 'demo-admin-1',
+      name: 'Admin',
+      email: 'admin@saathi.com',
+      password: 'Admin@2026',
+      ngoName: 'Saathi HQ',
+      createdAt: new Date().toISOString(),
+    },
+  ];
 
   // Seed demo volunteer accounts
   const demoVolunteers = [
@@ -74,25 +87,32 @@ export function seedDemoAccounts() {
   ];
 
   try {
+    // Seed admin users
+    const existingAdmins = localStorage.getItem(ADMIN_USERS_KEY);
+    if (!existingAdmins || existingAdmins === '[]') {
+      localStorage.setItem(ADMIN_USERS_KEY, JSON.stringify(demoAdmins));
+      console.log('Demo admin accounts seeded');
+    }
+
     // Check if volunteer users already exist (to avoid overwriting real data)
     const existingVolunteers = localStorage.getItem(VOLUNTEER_USERS_KEY);
     if (!existingVolunteers || existingVolunteers === '[]') {
       localStorage.setItem(VOLUNTEER_USERS_KEY, JSON.stringify(demoVolunteers));
-      console.log('✅ Demo volunteer accounts seeded');
+      console.log('Demo volunteer accounts seeded');
     }
 
     // Check if citizen users already exist
     const existingCitizens = localStorage.getItem(CITIZEN_USERS_KEY);
     if (!existingCitizens || existingCitizens === '[]') {
       localStorage.setItem(CITIZEN_USERS_KEY, JSON.stringify(demoCitizens));
-      console.log('✅ Demo citizen accounts seeded');
+      console.log('Demo citizen accounts seeded');
     }
 
     // Mark as seeded
     localStorage.setItem(DEMO_SEEDED_FLAG, 'true');
-    console.log('✅ Demo accounts initialization complete');
+    console.log('Demo accounts initialization complete');
   } catch (error) {
-    console.error('❌ Error seeding demo accounts:', error);
+    console.error('Error seeding demo accounts:', error);
   }
 }
 
@@ -103,6 +123,8 @@ export function seedDemoAccounts() {
 export function resetDemoAccounts() {
   localStorage.removeItem('saathi.users');
   localStorage.removeItem('saathi.citizenUsers');
+  localStorage.removeItem('saathi.adminUsers');
   localStorage.removeItem('saathi.demoSeededFlag');
-  console.log('✅ Demo accounts reset. Refresh the page to re-seed.');
+  localStorage.removeItem('saathi.demoSeededV2');
+  console.log('Demo accounts reset. Refresh the page to re-seed.');
 }

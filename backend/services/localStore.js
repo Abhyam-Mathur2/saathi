@@ -397,10 +397,25 @@ async function deleteVolunteer(volunteerId, VolunteerModel) {
   return true;
 }
 
+async function updateReport(reportId, updateData, ReportModel) {
+  if (isMongoReady()) {
+    return ReportModel.findByIdAndUpdate(reportId, updateData, { new: true }).lean();
+  }
+  const store = readStore();
+  const index = store.reports.findIndex(r => r._id === reportId);
+  if (index !== -1) {
+    store.reports[index] = { ...store.reports[index], ...updateData };
+    writeStore(store);
+    return store.reports[index];
+  }
+  return null;
+}
+
 module.exports = {
   createReport,
   listReports,
   findReportById,
+  updateReport,
   countReports,
   aggregateReportCategories,
   aggregateReportTrend,

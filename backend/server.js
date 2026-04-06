@@ -16,6 +16,8 @@ const chatbotRoutes = require('./routes/chatbotRoutes');
 const impactRoutes = require('./routes/impact');
 const routesRoutes = require('./routes/routes');
 const plannerRoutes = require('./routes/planner');
+const eventsRoutes = require('./routes/events');
+const emergencyRoutes = require('./routes/emergency');
 
 require('./jobs/updateImpactScores');
 const { errorHandler } = require('./middleware/errorHandler');
