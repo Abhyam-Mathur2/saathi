@@ -6,6 +6,7 @@ import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
 import LocationInput from '../components/LocationInput';
 import { apiUrl } from '../config/api';
+import { getSession } from '../utils/roleAuth';
 
 const ReportSubmission = () => {
   const [activeTab, setActiveTab] = useState('form'); // 'form' or 'whatsapp'
@@ -22,6 +23,9 @@ const ReportSubmission = () => {
     address: '',
     longitude: 77.1025,
     latitude: 28.7041,
+    city: '',
+    state: '',
+    country: 'India',
     reportImage: '',
     locationVerified: false
   });
@@ -29,6 +33,18 @@ const ReportSubmission = () => {
   // WhatsApp Simulation State
   const [whatsappText, setWhatsappText] = useState('');
   const [aiResponsePreview, setAiResponsePreview] = useState('');
+  const splitAddress = (address) => {
+    const parts = String(address || '')
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+
+    return {
+      city: parts[0] || '',
+      state: parts[1] || '',
+      country: parts[2] || 'India',
+    };
+  };
 
   // Web Speech API Setup
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -97,17 +113,22 @@ const ReportSubmission = () => {
   };
 
   const handleLocationChange = (locationData) => {
+    const inferred = splitAddress(locationData.address);
     setFormData((prev) => ({
       ...prev,
       latitude: locationData.latitude,
       longitude: locationData.longitude,
       address: locationData.address,
+      city: inferred.city,
+      state: inferred.state,
+      country: inferred.country,
       locationVerified: locationData.isVerified || locationData.isGeocodedFromAddress,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const session = getSession();
     if (!formData.description || !formData.description.trim()) {
       toast.error('Description is required.');
       return;
@@ -129,6 +150,11 @@ const ReportSubmission = () => {
     try {
       const payload = {
         ...formData,
+        reporterName: session?.name || '',
+        reporterPhone: session?.phone || '',
+        city: formData.city || splitAddress(formData.address).city,
+        state: formData.state || splitAddress(formData.address).state,
+        country: formData.country || splitAddress(formData.address).country,
         location: {
           coordinates: [formData.longitude, formData.latitude],
           address: formData.address
@@ -138,7 +164,7 @@ const ReportSubmission = () => {
       
       await axios.post(apiUrl('/api/reports'), payload);
       toast.success('Report submitted successfully!');
-      setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041, reportImage: '', locationVerified: false });
+      setFormData({ description: '', issueType: 'Food', urgency: 5, address: '', longitude: 77.1025, latitude: 28.7041, reportImage: '', locationVerified: false, city: '', state: '', country: 'India' });
       setSelectedImageName('');
     } catch (error) {
       const errorMsg = error.response?.data?.message || 'Submission failed.';

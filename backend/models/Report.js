@@ -1,6 +1,41 @@
 const mongoose = require('mongoose');
 
 const ReportSchema = new mongoose.Schema({
+    organization: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Organization',
+        default: null,
+    },
+    city: {
+        type: String,
+        default: '',
+        trim: true,
+    },
+    state: {
+        type: String,
+        default: '',
+        trim: true,
+    },
+    country: {
+        type: String,
+        default: 'India',
+        trim: true,
+    },
+    citizen: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Citizen',
+        default: null,
+    },
+    reporterName: {
+        type: String,
+        default: '',
+        trim: true,
+    },
+    reporterPhone: {
+        type: String,
+        default: '',
+        trim: true,
+    },
     location: {
         type: {
             type: String,

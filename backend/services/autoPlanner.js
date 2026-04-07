@@ -9,6 +9,23 @@ const VolunteerRoute = require('../models/VolunteerRoute');
 const groqService = require('./groqService');
 const routeOptimizer = require('./routeOptimizer');
 
+const normalize = (value) => String(value || '').trim().toLowerCase();
+
+const sameScope = (report, volunteer) => {
+    if (report.organization && volunteer.organization) {
+        return String(report.organization) === String(volunteer.organization);
+    }
+
+    const reportCity = normalize(report.city || report.location?.address);
+    const volunteerCity = normalize(volunteer.city || volunteer.location?.address);
+
+    if (reportCity && volunteerCity) {
+        return reportCity.includes(volunteerCity) || volunteerCity.includes(reportCity);
+    }
+
+    return true;
+};
+
 exports.runAutoPlanner = async () => {
     // 1. Get unassigned reports
     const reports = await Report.find({ status: 'Pending' }).limit(20);
@@ -70,7 +87,9 @@ exports.runAutoPlanner = async () => {
         const vLng = v.location?.coordinates[0] || 77.0;
         
         // Find tasks within 500km of THIS volunteer
-        const nearbyTasks = reportsData.filter(t => getDist(vLat, vLng, t.lat, t.lng) < 500);
+        const nearbyTasks = reportsData
+            .filter(t => getDist(vLat, vLng, t.lat, t.lng) < 500)
+            .filter((task) => sameScope(task, v));
         
         console.log(`Volunteer ${v.name}: Found ${nearbyTasks.length} tasks within 500km.`);
         if (nearbyTasks.length === 0) return null;

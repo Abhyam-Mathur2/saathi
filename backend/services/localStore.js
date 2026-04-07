@@ -6,6 +6,8 @@ const dataDir = path.join(__dirname, '..', 'data');
 const dataFile = path.join(dataDir, 'local-db.json');
 
 const defaultData = {
+  organizations: [],
+  citizens: [],
   reports: [],
   volunteers: [],
   assignments: [],
@@ -13,6 +15,10 @@ const defaultData = {
 
 const seedReports = [
   {
+    organization: null,
+    city: 'Patna',
+    state: 'Bihar',
+    country: 'India',
     issueType: 'Food',
     urgency: 9,
     description: 'Severe food shortage in flood-affected village near Patna. 50 families need immediate dry rations.',
@@ -20,6 +26,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Patna',
+    state: 'Bihar',
+    country: 'India',
     issueType: 'Health',
     urgency: 10,
     description: 'Medical emergency: Outbreak of water-borne diseases in temporary shelter. Need doctors and medicines.',
@@ -27,6 +37,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'New Delhi',
+    state: 'Delhi',
+    country: 'India',
     issueType: 'Infrastructure',
     urgency: 7,
     description: 'Main approach road to the village blocked by fallen trees. Needs heavy equipment or manual labor.',
@@ -34,6 +48,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    country: 'India',
     issueType: 'Education',
     urgency: 4,
     description: 'Local primary school roof damaged. Need volunteers for minor repairs and organizing temporary classes.',
@@ -41,6 +59,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Chennai',
+    state: 'Tamil Nadu',
+    country: 'India',
     issueType: 'Safety',
     urgency: 8,
     description: 'Elderly residents stranded in waterlogged building. Need evacuation assistance.',
@@ -48,6 +70,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Bangalore',
+    state: 'Karnataka',
+    country: 'India',
     issueType: 'Environment',
     urgency: 6,
     description: 'Oil spill in local lake affecting local fauna. Need volunteers for cleanup.',
@@ -55,6 +81,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Kolkata',
+    state: 'West Bengal',
+    country: 'India',
     issueType: 'Food',
     urgency: 5,
     description: 'Community kitchen running low on vegetables and grains. Regular supply needed.',
@@ -62,6 +92,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Pune',
+    state: 'Maharashtra',
+    country: 'India',
     issueType: 'Health',
     urgency: 8,
     description: 'Blood donation camp needed due to recent accidents in the area.',
@@ -69,6 +103,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Gurgaon',
+    state: 'Haryana',
+    country: 'India',
     issueType: 'Infrastructure',
     urgency: 3,
     description: 'Street lights not working in Sector 15. Safety concern at night.',
@@ -76,6 +114,10 @@ const seedReports = [
     status: 'Pending',
   },
   {
+    organization: null,
+    city: 'Indore',
+    state: 'Madhya Pradesh',
+    country: 'India',
     issueType: 'Other',
     urgency: 5,
     description: 'Stray animals injured during heavy rains. Need veterinary assistance.',
@@ -86,6 +128,11 @@ const seedReports = [
 
 const seedVolunteers = [
   {
+    organization: null,
+    city: 'Patna',
+    state: 'Bihar',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Amit Sharma',
     phone: '9876543210',
     email: 'amit@example.com',
@@ -94,6 +141,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [85.14, 25.59], address: 'Patna, Bihar' },
   },
   {
+    organization: null,
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Priya Patel',
     phone: '9823456789',
     email: 'priya@example.com',
@@ -102,6 +154,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [72.88, 19.08], address: 'Mumbai, Maharashtra' },
   },
   {
+    organization: null,
+    city: 'Delhi',
+    state: 'Delhi',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Rahul Verma',
     phone: '9123456780',
     email: 'rahul@example.com',
@@ -110,6 +167,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [77.21, 28.62], address: 'Delhi' },
   },
   {
+    organization: null,
+    city: 'Chennai',
+    state: 'Tamil Nadu',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Sita Ramani',
     phone: '9445566778',
     email: 'sita@example.com',
@@ -118,6 +180,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [80.28, 13.09], address: 'Chennai' },
   },
   {
+    organization: null,
+    city: 'Bangalore',
+    state: 'Karnataka',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Vikram Singh',
     phone: '9988776655',
     email: 'vikram@example.com',
@@ -126,6 +193,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [77.6, 12.98], address: 'Bangalore' },
   },
   {
+    organization: null,
+    city: 'Kolkata',
+    state: 'West Bengal',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Anjali Gupta',
     phone: '9765432109',
     email: 'anjali@example.com',
@@ -134,6 +206,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [88.37, 22.58], address: 'Kolkata' },
   },
   {
+    organization: null,
+    city: 'Pune',
+    state: 'Maharashtra',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Karan Mehra',
     phone: '9554433221',
     email: 'karan@example.com',
@@ -142,6 +219,11 @@ const seedVolunteers = [
     location: { type: 'Point', coordinates: [73.86, 18.53], address: 'Pune' },
   },
   {
+    organization: null,
+    city: 'Hyderabad',
+    state: 'Telangana',
+    country: 'India',
+    role: 'ngo_worker',
     name: 'Sneha Reddy',
     phone: '9001122334',
     email: 'sneha@example.com',
@@ -199,6 +281,13 @@ function normalizeReport(report) {
   return {
     ...report,
     _id: report._id || crypto.randomUUID(),
+    organization: report.organization || null,
+    city: report.city || '',
+    state: report.state || '',
+    country: report.country || 'India',
+    citizen: report.citizen || null,
+    reporterName: report.reporterName || '',
+    reporterPhone: report.reporterPhone || '',
     location: {
       type: 'Point',
       coordinates: report.location?.coordinates || [77.1025, 28.7041],
@@ -213,6 +302,12 @@ function normalizeVolunteer(volunteer) {
   return {
     ...volunteer,
     _id: volunteer._id || crypto.randomUUID(),
+    organization: volunteer.organization || null,
+    city: volunteer.city || '',
+    state: volunteer.state || '',
+    country: volunteer.country || 'India',
+    role: volunteer.role || 'volunteer',
+    isActive: typeof volunteer.isActive === 'boolean' ? volunteer.isActive : true,
     skills: volunteer.skills || [],
     availability: volunteer.availability || { days: [], times: [] },
     location: {
@@ -255,7 +350,17 @@ async function listReports(ReportModel) {
 
 async function findReportById(reportId, ReportModel) {
   if (isMongoReady()) {
-    return ReportModel.findById(reportId).lean();
+    try {
+      const mongoose = require('mongoose');
+      if (!mongoose.Types.ObjectId.isValid(reportId)) {
+        // Legacy UUID/local IDs should not crash Mongo lookups.
+        return readStore().reports.find((report) => report._id === reportId) || null;
+      }
+
+      return ReportModel.findById(reportId).lean();
+    } catch (error) {
+      return null;
+    }
   }
 
   return readStore().reports.find((report) => report._id === reportId) || null;
@@ -363,6 +468,65 @@ async function listVolunteers(VolunteerModel) {
   return readStore().volunteers.slice();
 }
 
+async function listOrganizations() {
+  if (isMongoReady()) {
+    const Organization = require('../models/Organization');
+    return Organization.find({ active: true }).sort({ name: 1 }).lean();
+  }
+
+  return readStore().organizations || [];
+}
+
+async function createOrganization(organizationData) {
+  if (isMongoReady()) {
+    const Organization = require('../models/Organization');
+    const org = new Organization(organizationData);
+    await org.save();
+    return org.toObject();
+  }
+
+  const store = readStore();
+  const org = {
+    ...organizationData,
+    _id: crypto.randomUUID(),
+    active: organizationData.active !== false,
+    createdAt: organizationData.createdAt || new Date().toISOString(),
+  };
+  store.organizations = store.organizations || [];
+  store.organizations.push(org);
+  writeStore(store);
+  return org;
+}
+
+async function listCitizens() {
+  if (isMongoReady()) {
+    const Citizen = require('../models/Citizen');
+    return Citizen.find().lean();
+  }
+
+  return readStore().citizens || [];
+}
+
+async function createCitizen(citizenData) {
+  if (isMongoReady()) {
+    const Citizen = require('../models/Citizen');
+    const citizen = new Citizen(citizenData);
+    await citizen.save();
+    return citizen.toObject();
+  }
+
+  const store = readStore();
+  const citizen = {
+    ...citizenData,
+    _id: crypto.randomUUID(),
+    createdAt: citizenData.createdAt || new Date().toISOString(),
+  };
+  store.citizens = store.citizens || [];
+  store.citizens.push(citizen);
+  writeStore(store);
+  return citizen;
+}
+
 async function countVolunteers(VolunteerModel) {
   if (isMongoReady()) {
     return VolunteerModel.countDocuments();
@@ -377,6 +541,16 @@ async function countAssignments(AssignmentModel) {
   }
 
   return readStore().assignments.length;
+}
+
+async function listAssignments(AssignmentModel) {
+  if (isMongoReady()) {
+    return AssignmentModel.find().sort({ assignedAt: -1 }).lean();
+  }
+
+  return readStore().assignments
+    .slice()
+    .sort((a, b) => new Date(b.assignedAt || 0) - new Date(a.assignedAt || 0));
 }
 
 async function deleteVolunteer(volunteerId, VolunteerModel) {
@@ -409,6 +583,11 @@ module.exports = {
   listVolunteers,
   countVolunteers,
   countAssignments,
+  listAssignments,
   deleteVolunteer,
+  listOrganizations,
+  createOrganization,
+  listCitizens,
+  createCitizen,
   isMongoReady,
 };

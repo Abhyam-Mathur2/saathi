@@ -22,6 +22,23 @@ function deg2rad(deg) {
     return deg * (Math.PI / 180);
 }
 
+const normalize = (value) => String(value || '').trim().toLowerCase();
+
+const sameScope = (report, volunteer) => {
+    if (report.organization && volunteer.organization) {
+        return String(report.organization) === String(volunteer.organization);
+    }
+
+    const reportCity = normalize(report.city || report.location?.address);
+    const volunteerCity = normalize(volunteer.city || volunteer.location?.address);
+
+    if (reportCity && volunteerCity) {
+        return reportCity.includes(volunteerCity) || volunteerCity.includes(reportCity);
+    }
+
+    return true;
+};
+
 /**
  * Calculates match scores for volunteers against a specific report
  * @param {Object} report The community need report
@@ -40,7 +57,9 @@ function calculateMatches(report, volunteers) {
 
     const requiredSkills = requiredSkillsMap[report.issueType] || ['Logistics'];
 
-    const scores = volunteers.map(volunteer => {
+    const scores = volunteers
+        .filter((volunteer) => sameScope(report, volunteer))
+        .map(volunteer => {
         // 1. Skill Score (40%)
         const matchedSkills = volunteer.skills.filter(skill => requiredSkills.includes(skill));
         const skillScore = (matchedSkills.length / requiredSkills.length) * 10;
@@ -71,7 +90,7 @@ function calculateMatches(report, volunteers) {
             },
             totalScore: totalScore.toFixed(2)
         };
-    });
+        });
 
     // Sort by total score descending and take top 3
     return scores.sort((a, b) => b.totalScore - a.totalScore).slice(0, 3);

@@ -17,6 +17,50 @@ const canonicalIssueType = (value) => {
   return match || null;
 };
 
+const ISSUE_KEYWORDS = {
+  Food: ['food', 'meal', 'ration', 'hunger', 'bhook', 'khana', 'ann'],
+  Health: ['health', 'medical', 'medicine', 'doctor', 'hospital', 'injury', 'kit', 'ambulance'],
+  Education: ['education', 'school', 'college', 'teacher', 'class', 'exam', 'student'],
+  Infrastructure: ['infrastructure', 'road', 'bridge', 'drain', 'water', 'electricity', 'power', 'toilet'],
+  Safety: ['safety', 'security', 'crime', 'police', 'violence', 'harassment', 'danger', 'unsafe'],
+  Environment: ['environment', 'pollution', 'garbage', 'waste', 'drainage', 'air', 'waterlogging', 'sewage'],
+};
+
+const inferIssueTypeFromKeywords = (text) => {
+  const normalized = String(text || '').trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+
+  for (const [issueType, keywords] of Object.entries(ISSUE_KEYWORDS)) {
+    if (keywords.some((keyword) => normalized.includes(keyword))) {
+      return issueType;
+    }
+  }
+
+  return null;
+};
+
+const resolveIssueTypeFromUserText = async (text) => {
+  const exactType = canonicalIssueType(text);
+  if (exactType) {
+    return exactType;
+  }
+
+  const keywordType = inferIssueTypeFromKeywords(text);
+  if (keywordType) {
+    return keywordType;
+  }
+
+  try {
+    const parsed = await groqService.parseUnstructuredText(text);
+    return canonicalIssueType(parsed?.issueType);
+  } catch (error) {
+    console.error('Issue type inference error:', error?.message || error);
+    return null;
+  }
+};
+
 const parseUrgency = (value) => {
   const numeric = Number.parseInt(String(value || '').trim(), 10);
   if (Number.isNaN(numeric) || numeric < 1 || numeric > 10) {
@@ -89,6 +133,20 @@ const normalizePhoneForWhatsApp = (phone) => {
   return `whatsapp:+${normalized}`;
 };
 
+const normalizeFromWhatsApp = (phone) => {
+  const raw = String(phone || '').trim();
+  if (!raw) {
+    return null;
+  }
+
+  if (raw.startsWith('whatsapp:+')) {
+    return raw;
+  }
+
+  const normalizedTo = normalizePhoneForWhatsApp(raw);
+  return normalizedTo;
+};
+
 const buildWhatsAppAiReply = (reportId, parsedData = {}) => {
   const issueType = parsedData.issueType || 'Other';
   const urgency = parsedData.urgency || 5;
@@ -159,16 +217,27 @@ exports.webhook = async (req, res) => {
       }
 
       if (guidedFlow.step === 'issueType') {
-        const issueType = canonicalIssueType(incomingText);
+        const issueType = await resolveIssueTypeFromUserText(incomingText);
         if (!issueType) {
-          twiml.message(`Invalid issue type. Please choose one of: ${ISSUE_TYPES.join(', ')}.`);
+          twiml.message(
+            [
+              'I could not confidently detect the issue type from your text.',
+              `Please reply with one of: ${ISSUE_TYPES.join(', ')}.`,
+              'Example: Health or Food.',
+            ].join(' ')
+          );
           return res.type('text/xml').status(200).send(twiml.toString());
         }
 
         guidedFlow.data.issueType = issueType;
         guidedFlow.step = 'urgency';
         activeConversations.set(sender, guidedFlow);
-        twiml.message('Step 3/4: Enter urgency from 1 to 10 (10 = most urgent).');
+        twiml.message(
+          [
+            `Step 2/4 accepted. I detected this as: ${issueType}.`,
+            'Step 3/4: Enter urgency from 1 to 10 (10 = most urgent).',
+          ].join(' ')
+        );
         return res.type('text/xml').status(200).send(twiml.toString());
       }
 
@@ -243,10 +312,13 @@ exports.webhook = async (req, res) => {
 exports.sendMessage = async (req, res) => {
   try {
     const { to, message } = req.body;
-    const from = process.env.TWILIO_WHATSAPP_NUMBER;
+    const from = normalizeFromWhatsApp(process.env.TWILIO_WHATSAPP_NUMBER);
 
     if (!from || !process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
-      return res.status(500).json({ success: false, message: 'Twilio environment variables are missing.' });
+      return res.status(500).json({
+        success: false,
+        message: 'Twilio environment variables are missing or sender format is invalid. Use TWILIO_WHATSAPP_NUMBER like whatsapp:+14155238886.',
+      });
     }
 
     const toWhatsApp = normalizePhoneForWhatsApp(to);
@@ -269,12 +341,48 @@ exports.sendMessage = async (req, res) => {
       message: 'WhatsApp message sent successfully.',
       sid: response.sid,
       to: toWhatsApp,
+      status: response.status,
     });
   } catch (error) {
     console.error('Twilio send message error:', error?.message || error);
     return res.status(500).json({
       success: false,
       message: error?.message || 'Failed to send WhatsApp message.',
+    });
+  }
+};
+
+exports.getMessageStatus = async (req, res) => {
+  try {
+    const { sid } = req.params;
+
+    if (!sid) {
+      return res.status(400).json({ success: false, message: 'Message SID is required.' });
+    }
+
+    if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+      return res.status(500).json({ success: false, message: 'Twilio environment variables are missing.' });
+    }
+
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+    const message = await client.messages(sid).fetch();
+
+    return res.status(200).json({
+      success: true,
+      sid: message.sid,
+      status: message.status,
+      to: message.to,
+      from: message.from,
+      errorCode: message.errorCode,
+      errorMessage: message.errorMessage,
+      dateSent: message.dateSent,
+      dateUpdated: message.dateUpdated,
+    });
+  } catch (error) {
+    console.error('Twilio status fetch error:', error?.message || error);
+    return res.status(500).json({
+      success: false,
+      message: error?.message || 'Failed to fetch WhatsApp message status.',
     });
   }
 };

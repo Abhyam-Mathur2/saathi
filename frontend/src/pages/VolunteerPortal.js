@@ -1,39 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, MessageCircle, MapPin, ArrowRight, Phone, Send, MessageSquareText, AlertTriangle, User } from 'lucide-react';
+import { ShieldCheck, MessageCircle, MapPin, Phone, Send, MessageSquareText, AlertTriangle, User, CheckCircle, XCircle } from 'lucide-react';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
 import { toast, Toaster } from 'react-hot-toast';
 
-const MAX_DISTANCE_KM = 25;
-
-const getDistanceInKm = (coord1, coord2) => {
-  const [lon1, lat1] = coord1;
-  const [lon2, lat2] = coord2;
-
-  const toRad = (value) => (value * Math.PI) / 180;
-  const earthRadiusKm = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return earthRadiusKm * c;
-};
-
 const VolunteerPortal = () => {
-  const [reports, setReports] = useState([]);
-  const [volunteers, setVolunteers] = useState([]);
+  const [assignments, setAssignments] = useState([]);
   const [locationReady, setLocationReady] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [actioningId, setActioningId] = useState('');
+  const [activeVolunteer, setActiveVolunteer] = useState(null);
   const session = getSession();
   const [whatsappNumber, setWhatsappNumber] = useState(session?.phone || '');
-  const [whatsappMessage, setWhatsappMessage] = useState('Hi, I am available to help with a nearby community report.');
+  const [whatsappMessage, setWhatsappMessage] = useState('Hi, I am available to help with the assigned community report.');
   const [sendingWhatsApp, setSendingWhatsApp] = useState(false);
 
   const normalizeIndianWhatsAppNumber = (value) => {
@@ -97,214 +79,187 @@ const VolunteerPortal = () => {
     }
   };
 
+  const refreshAssignments = async (volunteerId) => {
+    const response = await axios.get(apiUrl('/api/assignments'), {
+      params: { volunteerId },
+    });
+    setAssignments(response.data.data || []);
+  };
+
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchAssignments = async () => {
       try {
-        const session = getSession();
-        const volunteerEmail = session?.email;
+        const currentSession = getSession();
+        const volunteerEmail = currentSession?.email;
 
         if (!volunteerEmail) {
           setLocationReady(false);
-          setReports([]);
+          setAssignments([]);
+          setLoading(false);
           return;
         }
 
-        const [reportsResponse, volunteersResponse] = await Promise.all([
-          axios.get(apiUrl('/api/reports')),
-          axios.get(apiUrl('/api/volunteers')),
-        ]);
+        const volunteersResponse = await axios.get(apiUrl('/api/volunteers'), {
+          params: { city: currentSession?.city || '' },
+        });
 
-        const activeVolunteer = (volunteersResponse.data.data || []).find(
+        const activeVolunteerRecord = (volunteersResponse.data.data || []).find(
           (volunteer) => String(volunteer.email || '').toLowerCase() === String(volunteerEmail).toLowerCase()
         );
 
-        // If volunteer not registered, show message and fetch all urgent reports
-        if (!activeVolunteer) {
-          console.warn('Volunteer not registered yet. Showing all urgent reports.');
-          const allUrgentReports = (reportsResponse.data.data || [])
-            .filter((report) => Number(report.urgency) >= 8)
-            .sort((a, b) => Number(b.urgency) - Number(a.urgency));
-          
+        if (!activeVolunteerRecord) {
           setLocationReady(false);
-          setReports(allUrgentReports.slice(0, 5));
+          setActiveVolunteer(null);
+          setAssignments([]);
+          setLoading(false);
           return;
         }
 
-        const volunteerCoordinates = activeVolunteer?.location?.coordinates;
-        if (!volunteerCoordinates || volunteerCoordinates.length < 2) {
-          console.warn('Volunteer has no location coordinates');
-          setLocationReady(false);
-          setReports([]);
-          setVolunteers([]);
-          return;
-        }
+        setActiveVolunteer(activeVolunteerRecord);
+        const assignmentsResponse = await axios.get(apiUrl('/api/assignments'), {
+          params: { volunteerId: activeVolunteerRecord._id },
+        });
 
-        const userLatitude = volunteerCoordinates[1];
-        const userLongitude = volunteerCoordinates[0];
-
-        const [nearbyReportsResponse, nearbyVolunteersResponse] = await Promise.all([
-          axios.get(apiUrl('/api/reports'), {
-            params: {
-              latitude: userLatitude,
-              longitude: userLongitude,
-              radiusKm: MAX_DISTANCE_KM,
-            },
-          }),
-          axios.get(apiUrl('/api/volunteers'), {
-            params: {
-              latitude: userLatitude,
-              longitude: userLongitude,
-              radiusKm: MAX_DISTANCE_KM,
-            },
-          }),
-        ]);
-
-        const nearbyReports = (nearbyReportsResponse.data.data || [])
-          .map((report) => ({
-            ...report,
-            distanceKm: report?.location?.coordinates?.length >= 2
-              ? getDistanceInKm(volunteerCoordinates, report.location.coordinates)
-              : Number.MAX_SAFE_INTEGER,
-          }))
-          .sort((a, b) => {
-            const urgencyDiff = Number(b.urgency) - Number(a.urgency);
-            if (urgencyDiff !== 0) return urgencyDiff;
-            return a.distanceKm - b.distanceKm;
-          });
-
-        const nearbyVolunteers = (nearbyVolunteersResponse.data.data || [])
-          .filter((volunteer) => String(volunteer.email || '').toLowerCase() !== String(volunteerEmail).toLowerCase())
-          .map((volunteer) => ({
-            ...volunteer,
-            distanceKm: volunteer?.location?.coordinates?.length >= 2
-              ? getDistanceInKm(volunteerCoordinates, volunteer.location.coordinates)
-              : Number.MAX_SAFE_INTEGER,
-          }))
-          .sort((a, b) => a.distanceKm - b.distanceKm);
-
+        setAssignments(assignmentsResponse.data.data || []);
         setLocationReady(true);
-        setReports(nearbyReports.slice(0, 8));
-        setVolunteers(nearbyVolunteers.slice(0, 5));
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching reports:', error);
+        console.error('Error fetching assignments:', error);
         setLocationReady(false);
-        setReports([]);
-        setVolunteers([]);
+        setAssignments([]);
+        setLoading(false);
       }
     };
 
-    fetchReports();
-    
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchReports, 30000);
+    fetchAssignments();
+
+    const interval = setInterval(fetchAssignments, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const respondToAssignment = async (assignmentId, action) => {
+    try {
+      setActioningId(assignmentId);
+      await axios.patch(apiUrl(`/api/assignments/${assignmentId}/respond`), {
+        action,
+      });
+      toast.success(action === 'accept' ? 'Assignment accepted.' : 'Assignment declined.');
+      if (activeVolunteer?._id) {
+        await refreshAssignments(activeVolunteer._id);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Unable to update assignment.');
+    } finally {
+      setActioningId('');
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
       <Toaster position="top-right" />
       <div>
         <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">Volunteer workspace</p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">See urgent matches and communicate quickly</h1>
-        <p className="mt-2 text-slate-600">Volunteers only see urgent reports within {MAX_DISTANCE_KM} km of their registered location.</p>
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">Your assigned reports only</h1>
+        <p className="mt-2 text-slate-600">You can only see tasks assigned by your NGO admin. Accept or decline each report below.</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {reports.length > 0 ? reports.map((report) => (
-          <div key={report._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{report.issueType}</p>
-                <h2 className="mt-2 text-lg font-semibold text-slate-900 line-clamp-2">{report.description}</h2>
-              </div>
-              <div className={`rounded-full p-2 ${Number(report.urgency) >= 8 ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-600'}`}>
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-            </div>
-
-            <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-              <MapPin className="h-4 w-4 text-slate-400" />
-              {report.location?.address || 'Unknown location'}
-            </p>
-            <p className="mt-1 text-xs text-slate-500">{report.distanceKm.toFixed(1)} km from you</p>
-
-            <div className="mt-4 flex gap-2">
-              <Link
-                to={`/match/${report._id}`}
-                className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-              >
-                Open Match <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <p className="mt-3 text-xs font-medium text-slate-500">
-              {Number(report.urgency) >= 8 ? 'Urgent' : 'Nearby'} report
-            </p>
+      {!locationReady ? (
+        <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-3" />
+          <p className="text-slate-900 font-bold text-lg">Volunteer profile not found</p>
+          <p className="text-slate-600 mt-2">Register as a volunteer with the same email you used to log in.</p>
+          <div className="mt-6 flex justify-center">
+            <Link
+              to="/volunteer-register"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors"
+            >
+              <User className="h-5 w-5" />
+              Register as Volunteer
+            </Link>
           </div>
-        )) : (
-          <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 md:col-span-2 xl:col-span-3">
-            <div className="text-center">
-              {locationReady ? (
-                <>
-                  <MapPin className="mx-auto h-12 w-12 text-slate-400 mb-3" />
-                  <p className="text-slate-600 font-medium">No urgent reports found within {MAX_DISTANCE_KM} km of your location right now.</p>
-                  <p className="text-sm text-slate-500 mt-2">Check back soon or broaden your search radius.</p>
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-3" />
-                  <p className="text-slate-900 font-bold text-lg">Complete Your Volunteer Setup</p>
-                  <p className="text-slate-600 mt-2">To see reports near you, please register as a volunteer with your location.</p>
-                  <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link
-                      to="/volunteer-register"
-                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white font-semibold hover:bg-primary-700 transition-colors"
-                    >
-                      <User className="h-5 w-5" />
-                      Register as Volunteer
-                    </Link>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-4">Once registered, you'll see all urgent reports within {MAX_DISTANCE_KM} km of your location.</p>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center gap-2 font-semibold text-slate-900">
-          <User className="h-5 w-5 text-primary-600" />
-          Nearby volunteers
         </div>
-        <p className="mt-2 text-sm text-slate-600">Volunteers within {MAX_DISTANCE_KM} km of your location.</p>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {volunteers.length > 0 ? volunteers.map((volunteer) => (
-            <div key={volunteer._id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-900">{volunteer.name}</p>
-                  <p className="text-xs text-slate-500">{volunteer.location?.address || 'Nearby location'}</p>
+      ) : loading ? (
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-center text-slate-500">
+          Loading assignments...
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {assignments.length > 0 ? assignments.map((assignment) => {
+            const report = assignment.report || {};
+            const isAssigned = assignment.status === 'Assigned';
+            const isConfirmed = assignment.status === 'Confirmed';
+
+            return (
+              <div key={assignment._id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{report.issueType || 'Report'}</p>
+                    <h2 className="mt-2 text-lg font-semibold text-slate-900 line-clamp-2">{report.description || 'No description'}</h2>
+                  </div>
+                  <div className="rounded-full bg-blue-50 p-2 text-blue-500">
+                    <ShieldCheck className="h-5 w-5" />
+                  </div>
                 </div>
-                <span className="text-xs font-semibold text-primary-700 bg-primary-50 px-2 py-1 rounded-full">
-                  {volunteer.distanceKm.toFixed(1)} km
-                </span>
+
+                <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+                  <MapPin className="h-4 w-4 text-slate-400" />
+                  {report.location?.address || 'Unknown location'}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">Status: {assignment.status}</p>
+                <p className="mt-1 text-xs text-slate-500">Assigned at: {assignment.assignedAt ? new Date(assignment.assignedAt).toLocaleString() : 'N/A'}</p>
+
+                <div className="mt-4 flex gap-2">
+                  {isAssigned && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => respondToAssignment(assignment._id, 'accept')}
+                        disabled={actioningId === assignment._id}
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Accept
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => respondToAssignment(assignment._id, 'decline')}
+                        disabled={actioningId === assignment._id}
+                        className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-60"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Decline
+                      </button>
+                    </>
+                  )}
+                  {isConfirmed && (
+                    <div className="w-full rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 text-center">
+                      Accepted by you
+                    </div>
+                  )}
+                  {assignment.status === 'Cancelled' && (
+                    <div className="w-full rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-600 text-center">
+                      Declined
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="mt-3 text-xs text-slate-600">
-                Skills: {(volunteer.skills || []).slice(0, 3).join(', ') || 'Not specified'}
-              </p>
+            );
+          }) : (
+            <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 md:col-span-2 xl:col-span-3 text-center">
+              <MapPin className="mx-auto h-12 w-12 text-slate-400 mb-3" />
+              <p className="text-slate-600 font-medium">No reports have been assigned to you yet.</p>
+              <p className="text-sm text-slate-500 mt-2">Your NGO admin will assign work based on your city or organization.</p>
             </div>
-          )) : (
-            <div className="text-sm text-slate-500">No other nearby volunteers found.</div>
           )}
         </div>
-      </div>
+      )}
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 font-semibold text-slate-900">
           <MessageCircle className="h-5 w-5 text-emerald-600" />
           Volunteer communication
         </div>
-        <p className="mt-2 text-sm text-slate-600">Use the WhatsApp chat box below to contact a citizen, coordinator, or another volunteer directly.</p>
+        <p className="mt-2 text-sm text-slate-600">Use WhatsApp to contact the citizen or NGO coordinator assigned to your task.</p>
 
         <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
@@ -342,7 +297,7 @@ const VolunteerPortal = () => {
                 rows="3"
                 value={whatsappMessage}
                 onChange={(e) => setWhatsappMessage(e.target.value)}
-                placeholder="Type your message here... (e.g., Hi, I am available to help with a nearby community report)"
+                placeholder="Type your message here..."
                 className="w-full px-4 py-3 rounded-xl border-2 border-emerald-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all resize-none"
               />
             </div>
@@ -362,8 +317,6 @@ const VolunteerPortal = () => {
             </p>
           </div>
         </div>
-
-        <p className="mt-4 text-sm text-slate-600">You can also review volunteers from the directory for support coordination.</p>
       </div>
 
       <ChatbotWidget defaultRole="volunteer" />

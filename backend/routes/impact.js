@@ -6,9 +6,17 @@ const axios = require('axios');
 
 router.get('/heatmap', async (req, res) => {
     try {
-        const zones = await ImpactZone.find({});
+        const query = ImpactZone.find({});
+        const zones = await query.timeout({ serverSelectionTimeoutMS: 5000 });
         res.json({ success: true, data: zones });
     } catch (e) {
+        if (e.message && (e.message.includes('timeout') || e.message.includes('buffering'))) {
+            return res.status(503).json({ 
+                success: false, 
+                message: 'Database temporarily unavailable. Please try again.',
+                data: []
+            });
+        }
         res.status(500).json({ success: false, message: e.message });
     }
 });

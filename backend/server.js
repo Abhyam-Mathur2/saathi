@@ -5,6 +5,9 @@ require('dotenv').config();
 
 const Report = require('./models/Report');
 const Volunteer = require('./models/Volunteer');
+const Organization = require('./models/Organization');
+const Citizen = require('./models/Citizen');
+const Assignment = require('./models/Assignment');
 
 console.log('Environment Variables Check:');
 console.log('- PORT:', process.env.PORT);
@@ -19,6 +22,9 @@ const chatbotRoutes = require('./routes/chatbotRoutes');
 const impactRoutes = require('./routes/impact');
 const routesRoutes = require('./routes/routes');
 const plannerRoutes = require('./routes/planner');
+const organizationRoutes = require('./routes/organizationRoutes');
+const citizenRoutes = require('./routes/citizenRoutes');
+const assignmentRoutes = require('./routes/assignmentRoutes');
 
 require('./jobs/updateImpactScores');
 const { errorHandler } = require('./middleware/errorHandler');
@@ -54,6 +60,9 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/impact', impactRoutes);
 app.use('/api/routes', routesRoutes);
 app.use('/api/planner', plannerRoutes);
+app.use('/api/organizations', organizationRoutes);
+app.use('/api/citizens', citizenRoutes);
+app.use('/api/assignments', assignmentRoutes);
 
 app.get('/whatsapp/webhook', (req, res) => {
     res.status(200).send('Saathi WhatsApp webhook is live. Use POST from Twilio.');
@@ -69,23 +78,32 @@ app.get('/whatsapp/health', (req, res) => {
 // Seed sample data for testing location filtering
 app.post('/api/seed', async (req, res) => {
     try {
-        const { sampleVolunteers, sampleReports } = require('./seedSampleData');
+        const { organizations, volunteers, citizens, reports } = require('./seedTenantData');
         
         // Clear existing data
         await Promise.all([
+            require('./models/Organization').deleteMany({}),
+            require('./models/Citizen').deleteMany({}),
             Volunteer.deleteMany({}),
+            require('./models/Assignment').deleteMany({}),
             Report.deleteMany({})
         ]);
 
-        // Seed volunteers
-        const createdVolunteers = await Volunteer.insertMany(sampleVolunteers);
+        const Organization = require('./models/Organization');
+        const Citizen = require('./models/Citizen');
+
+        const createdOrganizations = await Organization.insertMany(organizations);
+        const createdCitizens = await Citizen.insertMany(citizens);
+        const createdVolunteers = await Volunteer.insertMany(volunteers);
         
         // Seed reports
-        const createdReports = await Report.insertMany(sampleReports);
+        const createdReports = await Report.insertMany(reports);
 
         res.json({
             success: true,
             message: 'Sample data seeded successfully',
+            organizations: createdOrganizations.length,
+            citizens: createdCitizens.length,
             volunteers: createdVolunteers.length,
             reports: createdReports.length
         });
@@ -115,12 +133,19 @@ const mongoUri = process.env.MONGODB_URI;
 if (!mongoUri) {
     console.warn('MONGODB_URI is not set. Running in local fallback mode without MongoDB.');
 } else {
-    mongoose.connect(mongoUri)
+    const mongoOptions = {
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 5000,
+        connectTimeoutMS: 5000,
+        family: 4,
+    };
+    
+    mongoose.connect(mongoUri, mongoOptions)
         .then(() => {
             console.log('MongoDB connected successfully');
         })
         .catch(err => {
-            console.error('MongoDB connection error:', err);
+            console.error('MongoDB connection error:', err.message);
             console.warn('Backend is running without a MongoDB connection. Data routes may fail until MongoDB is available.');
         });
 }

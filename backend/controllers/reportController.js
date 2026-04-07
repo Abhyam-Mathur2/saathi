@@ -4,6 +4,41 @@ const matchingEngine = require('../services/matchingEngine');
 const Volunteer = require('../models/Volunteer');
 const localStore = require('../services/localStore');
 
+const normalize = (value) => String(value || '').trim().toLowerCase();
+
+const deriveGeoText = (report) => normalize(report.city || report.state || report.location?.address);
+
+const matchesScope = (item, scope = {}) => {
+    const scopeOrganization = String(scope.organizationId || '').trim();
+    const scopeCity = normalize(scope.city);
+    const scopeState = normalize(scope.state);
+    const scopeCountry = normalize(scope.country);
+
+    if (scopeOrganization) {
+        return String(item.organization || '') === scopeOrganization;
+    }
+
+    const itemGeoText = deriveGeoText(item);
+
+    if (scopeCity && itemGeoText.includes(scopeCity)) {
+        return true;
+    }
+
+    if (scopeState && itemGeoText.includes(scopeState)) {
+        return true;
+    }
+
+    if (scopeCountry && normalize(item.country || 'India').includes(scopeCountry)) {
+        return true;
+    }
+
+    if (!scopeCity && !scopeState && !scopeCountry && !scopeOrganization) {
+        return true;
+    }
+
+    return false;
+};
+
 const buildAiResponse = (parsedData = {}) => {
     const issueType = parsedData.issueType || 'Other';
     const urgency = parsedData.urgency || 5;
@@ -37,6 +72,13 @@ exports.createReport = async (req, res) => {
                 console.warn('Validation Failed: Incomplete location data');
                 return res.status(400).json({ success: false, message: 'Location with coordinates and address is required' });
             }
+
+            reportData.organization = reportData.organization || null;
+            reportData.city = reportData.city || (String(reportData.location.address || '').split(',')[0] || '').trim();
+            reportData.state = reportData.state || (String(reportData.location.address || '').split(',')[1] || '').trim();
+            reportData.country = reportData.country || 'India';
+            reportData.reporterName = reportData.reporterName || '';
+            reportData.reporterPhone = reportData.reporterPhone || '';
 
             // Ensure coordinates are numbers
             reportData.location.coordinates = reportData.location.coordinates.map(Number);
@@ -72,6 +114,7 @@ exports.createReport = async (req, res) => {
 exports.getReports = async (req, res) => {
     try {
         const reports = await localStore.listReports(Report);
+        const scopedReports = reports.filter((report) => matchesScope(report, req.query));
 
         // If latitude and longitude provided, filter by location
         const { latitude, longitude, radiusKm = 25 } = req.query;
@@ -89,7 +132,7 @@ exports.getReports = async (req, res) => {
             }
 
             // Filter reports within radius
-            const filteredReports = reports.filter((report) => {
+            const filteredReports = scopedReports.filter((report) => {
                 if (!report.location || !report.location.coordinates || report.location.coordinates.length < 2) {
                     return false;
                 }
@@ -116,7 +159,7 @@ exports.getReports = async (req, res) => {
         }
 
         // Return all reports if no location filter
-        res.status(200).json({ success: true, data: reports });
+        res.status(200).json({ success: true, data: scopedReports });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -152,7 +195,21 @@ exports.getMatchesForReport = async (req, res) => {
         }
 
         const volunteers = await localStore.listVolunteers(Volunteer);
-        const matches = matchingEngine.calculateMatches(report, volunteers);
+        const scopedVolunteers = volunteers.filter((volunteer) => {
+            if (report.organization && volunteer.organization) {
+                return String(report.organization) === String(volunteer.organization);
+            }
+
+            const reportCity = normalize(report.city || report.location?.address);
+            const volunteerCity = normalize(volunteer.city || volunteer.location?.address);
+            if (reportCity && volunteerCity) {
+                return reportCity.includes(volunteerCity) || volunteerCity.includes(reportCity);
+            }
+
+            return true;
+        });
+
+        const matches = matchingEngine.calculateMatches(report, scopedVolunteers);
 
         res.status(200).json({ success: true, data: matches });
     } catch (error) {

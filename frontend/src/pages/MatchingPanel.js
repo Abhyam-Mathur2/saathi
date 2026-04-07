@@ -5,6 +5,7 @@ import { User, MapPin, Award, Calendar, ChevronLeft, CheckCircle, ShieldCheck, M
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
+import { getSession } from '../utils/roleAuth';
 
 const MatchingPanel = () => {
   const { reportId } = useParams();
@@ -26,23 +27,87 @@ const MatchingPanel = () => {
     fetchMatches();
   }, [reportId]);
 
-  const handleAssign = (volunteerName) => {
-    toast.success(`Assignment simulated! Alert sent to ${volunteerName}`);
-    console.log(`Alert sent to ${volunteerName}: Urgent task assigned.`);
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  const getReadableStatus = (status) => {
+    const normalized = String(status || '').toLowerCase();
+    if (normalized === 'delivered' || normalized === 'read') return 'delivered';
+    if (normalized === 'sent' || normalized === 'queued' || normalized === 'accepted' || normalized === 'scheduled') return 'processing';
+    if (normalized === 'failed' || normalized === 'undelivered' || normalized === 'canceled') return 'failed';
+    return 'processing';
+  };
+
+  const pollMessageDelivery = async (sid) => {
+    // Poll Twilio status for up to ~18 seconds.
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const statusResponse = await axios.get(apiUrl(`/api/whatsapp/status/${sid}`));
+      const status = statusResponse.data?.status || 'unknown';
+      const readable = getReadableStatus(status);
+
+      if (readable === 'delivered') {
+        return { final: true, status, payload: statusResponse.data };
+      }
+
+      if (readable === 'failed') {
+        return { final: true, status, payload: statusResponse.data };
+      }
+
+      await wait(3000);
+    }
+
+    return { final: false, status: 'queued', payload: null };
   };
 
   const handleSendMessage = async (volunteer) => {
     try {
       setSendingTo(volunteer._id);
-      await axios.post(apiUrl('/api/whatsapp/send'), {
+      const sendResponse = await axios.post(apiUrl('/api/whatsapp/send'), {
         to: volunteer.phone,
         message: `Hi ${volunteer.name || 'Volunteer'}, you have a new community task from Saathi.`,
       });
-      toast.success(`WhatsApp message sent to ${volunteer.name}`);
+
+      const sid = sendResponse.data?.sid;
+      if (!sid) {
+        toast.success(`WhatsApp API accepted message for ${volunteer.name}.`);
+        return;
+      }
+
+      toast.loading(`Sending WhatsApp to ${volunteer.name}...`, { id: `msg-${sid}` });
+      const delivery = await pollMessageDelivery(sid);
+
+      if (delivery.final && getReadableStatus(delivery.status) === 'delivered') {
+        toast.success(`WhatsApp delivered to ${volunteer.name} (${delivery.status}).`, { id: `msg-${sid}` });
+        return;
+      }
+
+      if (delivery.final && getReadableStatus(delivery.status) === 'failed') {
+        const reason = delivery.payload?.errorMessage || 'Delivery failed or destination not WhatsApp-enabled.';
+        toast.error(`Message failed for ${volunteer.name}: ${reason}`, { id: `msg-${sid}` });
+        return;
+      }
+
+      toast.success(`Message queued for ${volunteer.name}. Current status: ${delivery.status}.`, { id: `msg-${sid}` });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to send message');
     } finally {
       setSendingTo('');
+    }
+  };
+
+  const handleCreateAssignment = async (match) => {
+    try {
+      const session = getSession();
+      await axios.post(apiUrl('/api/assignments'), {
+        reportId,
+        volunteerId: match.volunteer._id,
+        organizationId: session?.organizationId || match.volunteer.organization || null,
+        assignedBy: session?.id || null,
+        note: `Assigned from match panel to ${match.volunteer.name}`,
+      });
+
+      toast.success(`Task assigned to ${match.volunteer.name}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create assignment');
     }
   };
 
@@ -138,7 +203,7 @@ const MatchingPanel = () => {
 
                 <div className="space-y-2">
                   <button 
-                    onClick={() => handleAssign(match.volunteer.name)}
+                    onClick={() => handleCreateAssignment(match)}
                     className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${index === 0 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md shadow-primary-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                   >
                     <CheckCircle className="w-4 h-4" />

@@ -1,9 +1,54 @@
 const Volunteer = require('../models/Volunteer');
 const localStore = require('../services/localStore');
 
+const normalize = (value) => String(value || '').trim().toLowerCase();
+
+const deriveGeoText = (volunteer) => normalize(volunteer.city || volunteer.state || volunteer.location?.address);
+
+const matchesScope = (item, scope = {}) => {
+    const scopeOrganization = String(scope.organizationId || '').trim();
+    const scopeCity = normalize(scope.city);
+    const scopeState = normalize(scope.state);
+    const scopeCountry = normalize(scope.country);
+
+    if (scopeOrganization) {
+        return String(item.organization || '') === scopeOrganization;
+    }
+
+    const itemGeoText = deriveGeoText(item);
+
+    if (scopeCity && itemGeoText.includes(scopeCity)) {
+        return true;
+    }
+
+    if (scopeState && itemGeoText.includes(scopeState)) {
+        return true;
+    }
+
+    if (scopeCountry && normalize(item.country || 'India').includes(scopeCountry)) {
+        return true;
+    }
+
+    if (!scopeCity && !scopeState && !scopeCountry && !scopeOrganization) {
+        return true;
+    }
+
+    return false;
+};
+
 exports.registerVolunteer = async (req, res) => {
     try {
-        const volunteer = await localStore.createVolunteer(req.body, Volunteer);
+        const volunteerData = {
+            ...req.body,
+            organization: req.body.organization || null,
+            city: req.body.city || (String(req.body.location?.address || '').split(',')[0] || '').trim(),
+            state: req.body.state || (String(req.body.location?.address || '').split(',')[1] || '').trim(),
+            country: req.body.country || 'India',
+            role: req.body.role || 'volunteer',
+            isActive: req.body.isActive !== false,
+        };
+
+        const volunteer = await localStore.createVolunteer(volunteerData, Volunteer);
         res.status(201).json({ success: true, message: 'Volunteer registered', data: volunteer });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -13,6 +58,7 @@ exports.registerVolunteer = async (req, res) => {
 exports.getVolunteers = async (req, res) => {
     try {
         const volunteers = await localStore.listVolunteers(Volunteer);
+        const scopedVolunteers = volunteers.filter((volunteer) => matchesScope(volunteer, req.query));
 
         // If latitude and longitude provided, filter by location
         const { latitude, longitude, radiusKm = 25 } = req.query;
@@ -30,7 +76,7 @@ exports.getVolunteers = async (req, res) => {
             }
 
             // Filter volunteers within radius
-            const filteredVolunteers = volunteers.filter((volunteer) => {
+            const filteredVolunteers = scopedVolunteers.filter((volunteer) => {
                 if (!volunteer.location || !volunteer.location.coordinates || volunteer.location.coordinates.length < 2) {
                     return false;
                 }
@@ -57,7 +103,7 @@ exports.getVolunteers = async (req, res) => {
         }
 
         // Return all volunteers if no location filter
-        res.status(200).json({ success: true, data: volunteers });
+        res.status(200).json({ success: true, data: scopedVolunteers });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
