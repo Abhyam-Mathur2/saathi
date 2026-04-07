@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, UserPlus, Heart, Users, LogOut, Shield, HeartHandshake, UserRound } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+import LanguageSwitcher from './LanguageSwitcher';
 import { getSession, logoutSession } from '../utils/roleAuth';
 
 const Navbar = () => {
@@ -90,6 +91,7 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             {session ? (
               <>
                 <span className="hidden sm:inline text-sm font-medium text-slate-600">{session.name} ({session.role})</span>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AtSign, Lock, Loader2, LogIn, Copy, Check } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginCitizen } from '../utils/roleAuth';
 
 const CitizenLogin = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -40,8 +42,8 @@ const CitizenLogin = () => {
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 mb-4">
             <LogIn className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Citizen Login</h1>
-          <p className="text-slate-500 mt-2 text-sm">Login with your citizen username and password.</p>
+          <h1 className="text-2xl font-bold text-slate-900">{t('auth.citizenLogin')}</h1>
+          <p className="text-slate-500 mt-2 text-sm">{t('auth.loginDesc') || 'Login with your citizen username and password.'}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,7 +52,7 @@ const CitizenLogin = () => {
             <input
               required
               type="text"
-              placeholder="Username"
+              placeholder={t('auth.username') || 'Username'}
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
@@ -62,7 +64,7 @@ const CitizenLogin = () => {
             <input
               required
               type="password"
-              placeholder="Password"
+              placeholder={t('auth.password')}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
@@ -75,11 +77,11 @@ const CitizenLogin = () => {
             className="w-full h-12 bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-emerald-700 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-            Continue as Citizen
+            {t('auth.loginButton')}
           </button>
 
           <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900">
-            <p className="font-semibold text-sm mb-3">✅ Demo Citizen Credentials (Auto-seeded):</p>
+            <p className="font-semibold text-sm mb-3">✅ {t('auth.demoCredentials') || 'Demo Citizen Credentials (Auto-seeded):'}</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200">
                 <div>
@@ -120,9 +122,9 @@ const CitizenLogin = () => {
         </form>
 
         <p className="text-sm text-slate-500 text-center mt-6">
-          New user?{' '}
+          {t('auth.noAccount')}{' '}
           <Link to="/citizen/signup" className="font-semibold text-emerald-600 hover:text-emerald-700">
-            Create citizen account
+            {t('auth.signupHere')}
           </Link>
         </p>
 
