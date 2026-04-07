@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Activity, Users, AlertTriangle, FileText, Map, CheckCircle2, ChevronRight, MapPin, Phone, Loader2, Trophy, X } from 'lucide-react';
+import { Activity, FileText, Map, CheckCircle2, ChevronRight, MapPin, Loader2, Trophy } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
@@ -49,20 +49,6 @@ export default function AdminPortal() {
 
     const tabs = ['Overview', 'Reports', 'Volunteers', 'Auto Planner'];
     const urgentReports = reports.filter(r => r.urgency >= 7 && r.status === 'Pending').slice(0, 10);
-
-    const handleQuickAssign = async (reportId, volunteerId) => {
-        try {
-            const res = await fetch(`${API}/reports/${reportId}/assign`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ volunteerId, adminId: session.id, orgId })
-            });
-            const data = await res.json();
-            if (data.success) {
-                setReports(prev => prev.map(r => r._id === reportId ? { ...r, status: 'Assigned' } : r));
-            }
-        } catch (e) { console.error(e); }
-    };
 
     if (loading && activeTab === 'Overview') return (
         <div className="min-h-screen bg-warm-50 flex items-center justify-center">

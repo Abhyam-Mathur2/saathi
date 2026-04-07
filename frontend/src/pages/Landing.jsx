@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
-import { ChevronDown, CheckCircle2, Cpu, FileText, Building2, TrendingUp, Users, MapPin, LayoutDashboard, Heart, Languages } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChevronDown, CheckCircle2, Cpu, FileText, Building2, Users, LayoutDashboard, Heart, Languages } from 'lucide-react';
 import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
 import { useLanguage } from '../contexts/LanguageContext';
 import { translateLabel } from '../i18n/translations';
 

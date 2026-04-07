@@ -13,23 +13,24 @@ const AutoPlanner = () => {
     const [loadingMsg, setLoadingMsg] = useState('');
 
     const session = getSession();
+    const orgId = session?.orgId;
 
     useEffect(() => {
         const fetchLatest = async () => {
             try {
-                const url = session?.orgId ? `/api/planner/latest?orgId=${session.orgId}` : `/api/planner/latest`;
+                const url = orgId ? `/api/planner/latest?orgId=${orgId}` : `/api/planner/latest`;
                 const res = await axios.get(apiUrl(url));
                 if (res.data.data) setPlan(res.data.data);
             } catch(e) {}
         };
         fetchLatest();
-    }, []);
+    }, [orgId]);
 
     const runPlanner = async () => {
         setLoading(true);
         setLoadingMsg('🤖 AI is analyzing tasks and volunteers...');
         try {
-            const res = await axios.post(apiUrl('/api/planner/run'), { orgId: session?.orgId });
+            const res = await axios.post(apiUrl('/api/planner/run'), { orgId });
             setPlan(res.data.data);
         } catch(e) {
             console.error(e);

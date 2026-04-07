@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, CheckCircle2, Check, X, Navigation, Camera, Clock, AlertCircle, Loader2, Send } from 'lucide-react';
+import { MapPin, CheckCircle2, Check, X, Navigation, Camera, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
@@ -31,7 +31,6 @@ export default function VolunteerTasks() {
     const [assignments, setAssignments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showConfetti, setShowConfetti] = useState(false);
-    const [pinging, setPinging] = useState(null);
 
     // Completion Modal
     const [isCompleteOpen, setIsCompleteOpen] = useState(false);
@@ -88,46 +87,6 @@ export default function VolunteerTasks() {
             }
         } catch {
             toast.error('Failed to decline.', { id: 'decline' });
-        }
-    };
-
-    const handlePing = async (assignment) => {
-        setPinging(assignment._id);
-        try {
-            // 1. Find nearby volunteers
-            const city = session.city;
-            const resVols = await axios.get(`${API}/volunteers?city=${city}`);
-            const nearbyVols = resVols.data.data.filter(v => v._id !== session.id);
-
-            if (nearbyVols.length === 0) {
-                toast.error('No other volunteers found in your city.');
-                return;
-            }
-
-            // 2. Send ping to activity log
-            await axios.post(`${API}/activity/ping`, {
-                senderId: session.id,
-                senderName: session.name,
-                targetVolunteerIds: nearbyVols.map(v => v._id),
-                reportId: assignment.report._id
-            });
-
-            // 3. Send WhatsApp messages (optional, based on your Twilio config)
-            const message = `🚨 BACKUP NEEDED: Volunteer ${session.name} needs help with a ${assignment.report.issueType} task at ${assignment.report.location.address}. Join them if available!`;
-            
-            for (const vol of nearbyVols.slice(0, 3)) { // Limit to 3 for testing
-                await axios.post(`${API}/whatsapp/send`, {
-                    to: vol.phone,
-                    message: message
-                });
-            }
-
-            toast.success(`Ping sent to ${nearbyVols.length} volunteers!`);
-        } catch (error) {
-            console.error('Ping error:', error);
-            toast.error('Failed to send pings.');
-        } finally {
-            setPinging(null);
         }
     };
 
@@ -275,11 +234,37 @@ export default function VolunteerTasks() {
                                                         </Button>
                                                     </div>
                                                     <button
-                                                        onClick={() => handlePing(assignment)}
-                                                        disabled={pinging === assignment._id}
-                                                        className="w-full flex items-center justify-center gap-2 py-2 text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-xl transition-colors disabled:opacity-50"
+                                                        onClick={async () => {
+                                                            try {
+                                                                const city = session?.city;
+                                                                const resVols = await axios.get(`${API}/volunteers?city=${city}`);
+                                                                const nearbyVols = (resVols.data?.data || []).filter(v => v._id !== session.id);
+
+                                                                if (nearbyVols.length === 0) {
+                                                                    toast.error('No other volunteers found in your city.');
+                                                                    return;
+                                                                }
+
+                                                                await axios.post(`${API}/activity/ping`, {
+                                                                    senderId: session.id,
+                                                                    senderName: session.name,
+                                                                    targetVolunteerIds: nearbyVols.map(v => v._id),
+                                                                    reportId: assignment.report._id
+                                                                });
+
+                                                                const message = `BACKUP NEEDED: Volunteer ${session.name} needs help with a ${assignment.report.issueType} task at ${assignment.report.location.address}. Join if available.`;
+                                                                for (const vol of nearbyVols.slice(0, 3)) {
+                                                                    await axios.post(`${API}/whatsapp/send`, { to: vol.phone, message });
+                                                                }
+
+                                                                toast.success(`Ping sent to ${nearbyVols.length} volunteers!`);
+                                                            } catch (error) {
+                                                                console.error('Ping error:', error);
+                                                                toast.error('Failed to send pings.');
+                                                            }
+                                                        }}
+                                                        className="w-full py-2 text-xs font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 rounded-xl transition-colors"
                                                     >
-                                                        {pinging === assignment._id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                                         Request Backup (Ping Nearby)
                                                     </button>
                                                 </div>

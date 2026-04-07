@@ -12,7 +12,7 @@ export default function SideNav() {
   const session = getSession();
   const role = getActiveRole(session);
   const { language } = useLanguage();
-  const [collapsed, setCollapsed] = useState(false); // Could be toggled
+  const [collapsed] = useState(false); // Could be toggled
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {

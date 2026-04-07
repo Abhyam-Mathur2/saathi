@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { User, Phone, MapPin, Trash2, Search, Loader2, MessageCircle, Activity } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
@@ -16,16 +16,7 @@ const VolunteerManagement = () => {
   const [selectedVolunteer, setSelectedVolunteer] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  useEffect(() => {
-    fetchVolunteers();
-  }, []);
-
-  const openActivityDrawer = (volunteer) => {
-    setSelectedVolunteer(volunteer);
-    setIsDrawerOpen(true);
-  };
-
-  const fetchVolunteers = async () => {
+  const fetchVolunteers = useCallback(async () => {
     try {
       const orgParam = session?.orgId ? `?orgId=${session.orgId}` : '';
       const response = await axios.get(apiUrl(`/api/volunteers${orgParam}`));
@@ -35,6 +26,15 @@ const VolunteerManagement = () => {
     } finally {
       setLoading(false);
     }
+  }, [session?.orgId]);
+
+  useEffect(() => {
+    fetchVolunteers();
+  }, [fetchVolunteers]);
+
+  const openActivityDrawer = (volunteer) => {
+    setSelectedVolunteer(volunteer);
+    setIsDrawerOpen(true);
   };
 
   const handleDelete = async (id) => {

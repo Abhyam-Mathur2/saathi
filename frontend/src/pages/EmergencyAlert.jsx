@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { AlertTriangle, MapPin, Navigation, Loader2 } from 'lucide-react';
-import PageHeader from '../components/ui/PageHeader';
 import Button from '../components/ui/Button';
 import { apiUrl } from '../config/api';
 

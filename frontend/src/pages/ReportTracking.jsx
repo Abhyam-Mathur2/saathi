@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { MapPin, Phone, MessageCircle, CheckCircle2, ChevronRight, Clock, Map, User } from 'lucide-react';
+import { MapPin, Phone, MessageCircle, CheckCircle2, Clock, User } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Avatar from '../components/ui/Avatar';
 import Badge from '../components/ui/Badge';
-import Button from '../components/ui/Button';
 import TwitterPostCard, { shouldShowTwitterCard } from '../components/tracking/TwitterPostCard';
 
 export default function ReportTracking() {
   const { reportId } = useParams();
-  const navigate = useNavigate();
   const [report, setReport] = useState(null);
 
   useEffect(() => {

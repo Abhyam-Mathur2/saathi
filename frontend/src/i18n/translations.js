@@ -85,7 +85,6 @@ const translations = {
     'Skill-based matching': 'कौशल-आधारित मिलान',
     'Help the community': 'समुदाय की मदद करें',
     'Join as Volunteer': 'स्वयंसेवक बनें',
-    'Volunteer Login': 'स्वयंसेवक लॉगिन',
     'Citizen': 'नागरिक',
     'Report local issues easily': 'स्थानीय समस्याएँ आसानी से रिपोर्ट करें',
     'Get help quickly': 'जल्दी मदद पाएँ',

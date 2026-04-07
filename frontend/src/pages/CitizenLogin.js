@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { AtSign, Lock, Loader2, LogIn, Copy, Check } from 'lucide-react';
+import { AtSign, Lock, Loader2, LogIn } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginCitizen } from '../utils/roleAuth';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,14 +11,6 @@ const CitizenLogin = () => {
   const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
-  const [copiedField, setCopiedField] = useState(null);
-
-  const handleCopy = (text, field) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(field);
-    toast.success(translateLabel(language, 'Copied to clipboard!'));
-    setTimeout(() => setCopiedField(null), 2000);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();

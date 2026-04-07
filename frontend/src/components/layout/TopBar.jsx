@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Bell, Menu } from 'lucide-react';
+import { Heart, Menu } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import NotificationBell from '../NotificationBell';
 import { getSession } from '../../utils/roleAuth';

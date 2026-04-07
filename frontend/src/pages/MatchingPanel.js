@@ -10,6 +10,7 @@ import { getSession } from '../utils/roleAuth';
 const MatchingPanel = () => {
   const { reportId } = useParams();
   const session = getSession();
+  const orgId = session?.orgId;
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingTo, setSendingTo] = useState('');
@@ -18,7 +19,7 @@ const MatchingPanel = () => {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const orgParam = session?.orgId ? `?orgId=${session.orgId}` : '';
+        const orgParam = orgId ? `?orgId=${orgId}` : '';
         const response = await axios.get(apiUrl(`/api/reports/match/${reportId}${orgParam}`));
         setMatches(response.data.data);
       } catch (error) {
@@ -28,7 +29,7 @@ const MatchingPanel = () => {
       }
     };
     fetchMatches();
-  }, [reportId]);
+  }, [orgId, reportId]);
 
   const handleAssign = async (volunteer) => {
     setAssigning(volunteer._id);
@@ -36,7 +37,7 @@ const MatchingPanel = () => {
       const res = await axios.put(apiUrl(`/api/reports/${reportId}/assign`), {
         volunteerId: volunteer._id,
         adminId: session?.id,
-        orgId: session?.orgId
+        orgId
       });
       if (res.data.success) {
         toast.success(`✅ ${volunteer.name} assigned! Task sent.`);

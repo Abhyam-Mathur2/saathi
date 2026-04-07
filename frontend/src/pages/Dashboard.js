@@ -41,16 +41,18 @@ const Dashboard = () => {
   const [stats, setStats] = useState(emptyStats);
   const [loading, setLoading] = useState(true);
   const session = getSession();
+  const orgId = session?.orgId;
+  const city = session?.city;
   const backPath = session?.role === 'volunteer' ? '/volunteer' : '/admin';
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         let endpoint = '/api/dashboard/stats';
-        if (session?.orgId) {
-            endpoint += `?orgId=${session.orgId}`;
-        } else if (session?.city) {
-            endpoint += `?city=${session.city}`;
+        if (orgId) {
+          endpoint += `?orgId=${orgId}`;
+        } else if (city) {
+          endpoint += `?city=${city}`;
         }
         
         const response = await axios.get(apiUrl(endpoint));
@@ -73,7 +75,7 @@ const Dashboard = () => {
       }
     };
     fetchStats();
-  }, []);
+  }, [city, orgId]);
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[80vh]">

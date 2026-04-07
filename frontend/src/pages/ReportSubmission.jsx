@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, MapPin, Loader2, Sparkles, AlertCircle, LocateFixed, Mic, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Camera, MapPin, Loader2, Sparkles, LocateFixed, Mic, ChevronLeft, ChevronRight } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -115,7 +115,6 @@ export default function ReportSubmission() {
         let ocrText = '';
         const relevanceScore = Number(ai?.relevanceScore ?? 50);
         const aiRelevant = ai?.isRelevant !== false;
-        const isClearlyIrrelevant = !aiRelevant && relevanceScore < 25 && ocrText.length < 12;
 
         const aiDescription = String(ai?.description || ai?.aiSummary || ai?.relevanceReason || '').trim();
         const looksLikeErrorText = /failed|decommissioned|not supported|error|unavailable|vision ai/i.test(aiDescription);

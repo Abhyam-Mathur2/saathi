@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { CheckSquare, MessageSquare, Navigation, CheckCircle2, ChevronRight } from 'lucide-react';
+import { CheckSquare, MessageSquare, Navigation, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
-import Avatar from '../components/ui/Avatar';
 import { getSession } from '../utils/roleAuth';
 import ChatbotWidget from '../components/ChatbotWidget';
 import axios from 'axios';
@@ -24,6 +23,16 @@ export default function VolunteerPortal() {
   const [chatMessages, setChatMessages] = useState([]);
   const [newChatMsg, setNewChatMsg] = useState('');
   const [events, setEvents] = useState([]);
+
+  const fetchChatMessages = React.useCallback(async () => {
+    if (!session?.city) return;
+    try {
+      const res = await axios.get(apiUrl(`/api/community/${session.city}`));
+      if (res.data.success) setChatMessages(res.data.data);
+    } catch (e) {
+      console.error('Chat error:', e);
+    }
+  }, [session?.city]);
 
   const toggleAvailability = () => {
     setIsAvailable(!isAvailable);
@@ -61,17 +70,7 @@ export default function VolunteerPortal() {
           .then(d => { if (Array.isArray(d)) setEvents(d); })
           .catch(console.error);
     }
-  }, [activeTab, session?.city]);
-
-  const fetchChatMessages = async () => {
-    if (!session?.city) return;
-    try {
-      const res = await axios.get(apiUrl(`/api/community/${session.city}`));
-      if (res.data.success) setChatMessages(res.data.data);
-    } catch (e) {
-      console.error('Chat error:', e);
-    }
-  };
+  }, [activeTab, fetchChatMessages, navigate, session?.city]);
 
   const handleSendChat = async (e) => {
     e.preventDefault();

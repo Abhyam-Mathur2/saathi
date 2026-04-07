@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Compass, User, UserPlus, HelpCircle, LayoutDashboard, FileText, Users, Map, MoreHorizontal, CheckSquare, MessageCircle, Navigation, AlertTriangle, Calendar } from 'lucide-react';
+import { Home, User, UserPlus, LayoutDashboard, FileText, Users, Map, CheckSquare, Navigation, AlertTriangle, Calendar } from 'lucide-react';
 import { getSession } from '../../utils/roleAuth';
 import { getActiveRole } from '../../utils/roleSwitch';
 import { useLanguage } from '../../contexts/LanguageContext';
