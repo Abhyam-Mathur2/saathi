@@ -7,6 +7,7 @@ import Card from '../components/ui/Card';
 import Avatar from '../components/ui/Avatar';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import TwitterPostCard, { shouldShowTwitterCard } from '../components/tracking/TwitterPostCard';
 
 export default function ReportTracking() {
   const { reportId } = useParams();
@@ -27,7 +28,7 @@ export default function ReportTracking() {
         urgency: 8,
         status: 'Assigned',
         description: 'Fallen tree blocking main road.',
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
         location: { address: 'Sector 4, Main Road' },
         assignedVolunteer: {
           name: 'Amit Sharma',
@@ -99,9 +100,21 @@ export default function ReportTracking() {
               );
             })}
           </div>
-        </Card>
+          </Card>
 
-        {/* Volunteer Info */}
+          {/* Twitter Escalation Card */}
+          {shouldShowTwitterCard(report) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.3 }}
+            className="mt-6"
+          >
+            <TwitterPostCard report={report} />
+          </motion.div>
+          )}
+
+          {/* Volunteer Info */}
         {report.status !== 'Pending' && report.assignedVolunteer && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <h3 className="font-heading font-bold text-lg text-slate-800 mb-3 px-2">Assigned Volunteer</h3>

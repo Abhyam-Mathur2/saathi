@@ -4,6 +4,110 @@
       "location": {
         "type": "Point",
         "coordinates": [
+          77.2149,
+          28.6139
+        ],
+        "address": "Connaught Place, New Delhi"
+      },
+      "city": "Delhi",
+      "state": "Delhi",
+      "issueType": "Infrastructure",
+      "urgency": 8,
+      "description": "Broken footpath slabs near Connaught Place are creating a fall risk for pedestrians.",
+      "aiAnalysis": {
+        "urgencyScore": 8,
+        "reasoning": "This is a high-priority infrastructure issue because damaged paving in a busy public area can cause injuries and block safe movement.",
+        "category": "Infrastructure"
+      },
+      "source": "web",
+      "originalText": "Broken footpath slabs near Connaught Place",
+      "status": "Pending",
+      "assignedVolunteers": [],
+      "_id": "b7c8cfd1-7b11-4f26-8af0-2b7ad2e5e101",
+      "createdAt": "2026-04-07T05:20:00.000Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.209,
+          28.6623
+        ],
+        "address": "Azad Market, Delhi"
+      },
+      "city": "Delhi",
+      "state": "Delhi",
+      "issueType": "Health",
+      "urgency": 9,
+      "description": "A local dispensary is reporting a medicine shortage and needs urgent volunteer support for distribution coordination.",
+      "aiAnalysis": {
+        "urgencyScore": 9,
+        "reasoning": "A medicine shortage can quickly affect vulnerable residents and should be prioritized as a health issue.",
+        "category": "Health"
+      },
+      "source": "web",
+      "originalText": "Medicine shortage at local dispensary",
+      "status": "Pending",
+      "assignedVolunteers": [],
+      "_id": "b7c8cfd1-7b11-4f26-8af0-2b7ad2e5e102",
+      "createdAt": "2026-04-07T05:05:00.000Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.2654,
+          28.5512
+        ],
+        "address": "Saket, New Delhi"
+      },
+      "city": "Delhi",
+      "state": "Delhi",
+      "issueType": "Safety",
+      "urgency": 7,
+      "description": "A streetlight outage near a residential lane has made the area unsafe after dark.",
+      "aiAnalysis": {
+        "urgencyScore": 7,
+        "reasoning": "Poor lighting increases safety risks for residents and commuters during evening hours.",
+        "category": "Safety"
+      },
+      "source": "web",
+      "originalText": "Streetlight not working in Saket lane",
+      "status": "Pending",
+      "assignedVolunteers": [],
+      "_id": "b7c8cfd1-7b11-4f26-8af0-2b7ad2e5e103",
+      "createdAt": "2026-04-07T04:40:00.000Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          77.2295,
+          28.6353
+        ],
+        "address": "Old Delhi, Delhi"
+      },
+      "city": "Delhi",
+      "state": "Delhi",
+      "issueType": "Food",
+      "urgency": 8,
+      "description": "A community kitchen near Old Delhi needs volunteers to help organize food packets for evening distribution.",
+      "aiAnalysis": {
+        "urgencyScore": 8,
+        "reasoning": "Food distribution work in a dense area is time-sensitive and fits Rahul's logistics and transportation skills.",
+        "category": "Food"
+      },
+      "source": "web",
+      "originalText": "Need volunteers for evening food packet distribution",
+      "status": "Pending",
+      "assignedVolunteers": [],
+      "_id": "b7c8cfd1-7b11-4f26-8af0-2b7ad2e5e104",
+      "createdAt": "2026-04-07T04:10:00.000Z"
+    },
+    {
+      "location": {
+        "type": "Point",
+        "coordinates": [
           77.1025,
           28.7041
         ],

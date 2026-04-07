@@ -5,6 +5,8 @@ import axios from 'axios';
 import { apiUrl } from '../config/api';
 import PredictionCard from '../components/PredictionCard';
 import { Loader2, AlertTriangle, Users, ThermometerSun } from 'lucide-react';
+import { getSession } from '../utils/roleAuth';
+
 
 const HeatmapLayer = ({ zones }) => {
     return (
@@ -35,6 +37,8 @@ const HeatmapLayer = ({ zones }) => {
 };
 
 const ImpactMap = () => {
+    const session = getSession();
+    const city = session?.city || '';
     const [zones, setZones] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedZonePrediction, setSelectedZonePrediction] = useState(null);
@@ -42,7 +46,8 @@ const ImpactMap = () => {
     useEffect(() => {
         const fetchZones = async () => {
             try {
-                const res = await axios.get(apiUrl('/api/impact/heatmap'));
+                const query = city ? `?city=${encodeURIComponent(city)}` : '';
+                const res = await axios.get(apiUrl(`/api/impact/heatmap${query}`));
                 setZones(res.data.data);
             } catch(e) {
                 console.error(e);
@@ -51,7 +56,7 @@ const ImpactMap = () => {
             }
         };
         fetchZones();
-    }, []);
+    }, [city]);
 
     const fetchPrediction = async (zoneId) => {
         setSelectedZonePrediction(null);

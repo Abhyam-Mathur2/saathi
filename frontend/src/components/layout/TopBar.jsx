@@ -3,10 +3,13 @@ import { Heart, Bell, Menu } from 'lucide-react';
 import Avatar from '../ui/Avatar';
 import NotificationBell from '../NotificationBell';
 import { getSession } from '../../utils/roleAuth';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translateLabel } from '../../i18n/translations';
 
 export default function TopBar() {
   const [scrolled, setScrolled] = useState(false);
   const session = getSession();
+  const { language, toggleLanguage } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,7 +30,7 @@ export default function TopBar() {
         </button>
         <Heart className="w-6 h-6 text-primary-500 fill-current" />
         <span className="ml-2 font-heading font-bold text-lg bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-          Saathi
+          {translateLabel(language, 'Saathi')}
         </span>
       </div>
       
@@ -36,6 +39,13 @@ export default function TopBar() {
       </div>
 
       <div className="flex items-center space-x-4 ml-auto">
+        <button
+          onClick={toggleLanguage}
+          className="px-3 py-1.5 rounded-full border border-primary-200 bg-white text-xs font-bold text-primary-700 hover:bg-primary-50 transition-colors"
+          aria-label="Toggle language"
+        >
+          {language === 'en' ? 'EN' : 'HI'}
+        </button>
         <NotificationBell />
         {session && (
           <Avatar name={session.name} size="sm" className="ring-2 ring-white shadow-sm" />

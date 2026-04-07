@@ -17,17 +17,15 @@ const CitizenSignup = () => {
     city: '',
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match.');
       return;
     }
-
     try {
       setLoading(true);
-      signupCitizenUser(formData);
+      await signupCitizenUser(formData);
       toast.success('Citizen account created. Please log in.');
       navigate('/citizen/login');
     } catch (error) {
@@ -36,6 +34,7 @@ const CitizenSignup = () => {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="max-w-md mx-auto px-4 py-10">

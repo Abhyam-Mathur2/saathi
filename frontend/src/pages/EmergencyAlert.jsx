@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 import { AlertTriangle, MapPin, Navigation, Loader2 } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import Button from '../components/ui/Button';
+import { apiUrl } from '../config/api';
 
 export default function EmergencyAlert() {
   const [type, setType] = useState('Medical');
@@ -42,7 +43,7 @@ export default function EmergencyAlert() {
     if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
 
     try {
-      const res = await fetch('/api/emergency', {
+      const res = await fetch(apiUrl('/api/emergency'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, description, location, radiusKm: radius })

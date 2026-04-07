@@ -4,14 +4,17 @@ import { Send, X, Mic, Sparkles } from 'lucide-react';
 import { apiUrl } from '../config/api';
 import { getSession } from '../utils/roleAuth';
 import { getActiveRole } from '../utils/roleSwitch';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translateLabel } from '../i18n/translations';
 
 export default function ChatbotWidget({ defaultRole }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([{ role: 'assistant', content: 'Namaste! How can Saathi assist you today?' }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [language, setLanguage] = useState('en');
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const { language, toggleLanguage } = useLanguage();
   
   const session = getSession();
   const currentRole = getActiveRole(session) || defaultRole || 'citizen';
@@ -27,6 +30,12 @@ export default function ChatbotWidget({ defaultRole }) {
     window.addEventListener('open-chatbot', handleOpen);
     return () => window.removeEventListener('open-chatbot', handleOpen);
   }, []);
+
+  useEffect(() => {
+    setMessages([
+      { role: 'assistant', content: language === 'hi' ? 'नमस्ते! मैं आज आपकी कैसे मदद कर सकता हूँ?' : 'Namaste! How can Saathi assist you today?' }
+    ]);
+  }, [language]);
 
   useEffect(() => {
     if (messagesEndRef.current) {
@@ -50,16 +59,44 @@ export default function ChatbotWidget({ defaultRole }) {
           message: text,
           history: messages.slice(-5),
           role: currentRole,
-          language
+          language,
+          city: session?.city,
+          orgId: session?.orgId,
+          userId: session?.id
         })
       });
       const data = await res.json();
       setMessages([...newMessages, { role: 'assistant', content: data.message || 'Sorry, I encountered an error.' }]);
     } catch (e) {
       setMessages([...newMessages, { role: 'assistant', content: 'Network error. Please try again.' }]);
+      setMessages([...newMessages, { role: 'assistant', content: 'Network error. Please try again.' }]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Your browser does not support Speech Recognition.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+    recognition.interimResults = false;
+    
+    recognition.onstart = () => setIsListening(true);
+    
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+
+    recognition.start();
   };
 
   return (
@@ -94,18 +131,17 @@ export default function ChatbotWidget({ defaultRole }) {
                 <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">🤖</div>
                 <div>
                   <h3 className="font-bold font-heading leading-tight">Saathi AI</h3>
-                  <p className="text-[10px] text-primary-200">Online • {currentRole} assist</p>
+                  <p className="text-[10px] text-primary-200">{language === 'hi' ? 'ऑनलाइन • सहायता उपलब्ध' : 'Online • ' + currentRole + ' assist'}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <select 
+                <button
+                  onClick={toggleLanguage}
                   className="bg-primary-700 text-xs text-white border-0 rounded px-2 py-1 outline-none"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
+                  aria-label="Toggle chatbot language"
                 >
-                  <option value="en">EN</option>
-                  <option value="hi">HI</option>
-                </select>
+                  {language === 'en' ? 'EN' : 'HI'}
+                </button>
                 <button onClick={() => setIsOpen(false)} className="p-1 hover:bg-primary-700 rounded-full transition-colors">
                   <X className="w-5 h-5" />
                 </button>
@@ -142,7 +178,7 @@ export default function ChatbotWidget({ defaultRole }) {
                     onClick={() => handleSend(qr)}
                     className="px-3 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-bold rounded-full whitespace-nowrap transition-colors"
                   >
-                    {qr}
+                    {translateLabel(language, qr)}
                   </button>
                 ))}
               </div>
@@ -152,10 +188,13 @@ export default function ChatbotWidget({ defaultRole }) {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask Saathi..."
+                  placeholder={language === 'hi' ? 'साथी से पूछें...' : 'Ask Saathi...'}
                   className="flex-1 bg-warm-100 border-0 rounded-full pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-                <button className="absolute right-14 text-slate-400 hover:text-primary-600 p-1">
+                <button 
+                  onClick={startListening}
+                  className={`absolute right-14 p-1 ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-primary-600'}`}
+                >
                   <Mic className="w-4 h-4" />
                 </button>
                 <button 

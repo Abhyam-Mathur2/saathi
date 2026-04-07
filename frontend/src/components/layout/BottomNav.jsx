@@ -4,42 +4,45 @@ import { motion } from 'framer-motion';
 import { Home, Compass, User, UserPlus, HelpCircle, LayoutDashboard, FileText, Users, Map, MoreHorizontal, CheckSquare, MessageCircle, Navigation, AlertTriangle, Calendar } from 'lucide-react';
 import { getSession } from '../../utils/roleAuth';
 import { getActiveRole } from '../../utils/roleSwitch';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translateLabel } from '../../i18n/translations';
 
 export default function BottomNav() {
   const location = useLocation();
   const session = getSession();
   const role = getActiveRole(session);
+  const { language } = useLanguage();
 
   let tabs = [];
 
   if (!session) {
     tabs = [
-      { path: '/', label: 'Home', icon: Home },
-      { path: '/login', label: 'Login', icon: User },
-      { path: '/register', label: 'Sign Up', icon: UserPlus },
+      { path: '/', label: translateLabel(language, 'Home'), icon: Home },
+      { path: '/login', label: translateLabel(language, 'Login'), icon: User },
+      { path: '/register', label: translateLabel(language, 'Sign Up'), icon: UserPlus },
     ];
   } else if (role === 'admin') {
     tabs = [
-      { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-      { path: '/admin/reports', label: 'Reports', icon: FileText },
-      { path: '/admin/volunteers', label: 'Volunteers', icon: Users },
-      { path: '/admin/planner', label: 'Planner', icon: Map },
-      { path: '/admin/events', label: 'Events', icon: Calendar },
+      { path: '/admin', label: translateLabel(language, 'Dashboard'), icon: LayoutDashboard },
+      { path: '/admin/reports', label: translateLabel(language, 'Reports'), icon: FileText },
+      { path: '/admin/volunteers', label: translateLabel(language, 'Volunteers'), icon: Users },
+      { path: '/admin/planner', label: translateLabel(language, 'Planner'), icon: Map },
+      { path: '/admin/events', label: translateLabel(language, 'Events'), icon: Calendar },
     ];
   } else if (role === 'volunteer') {
     tabs = [
-      { path: '/volunteer', label: 'Home', icon: Home },
-      { path: '/volunteer/tasks', label: 'Tasks', icon: CheckSquare },
-      { path: '/volunteer/reports', label: 'Reports', icon: FileText },
-      { path: '/route-planner', label: 'Map', icon: Navigation },
+      { path: '/volunteer', label: translateLabel(language, 'Home'), icon: Home },
+      { path: '/volunteer/tasks', label: translateLabel(language, 'My Tasks'), icon: CheckSquare },
+      { path: '/volunteer/reports', label: translateLabel(language, 'Find Reports'), icon: FileText },
+      { path: '/route-planner', label: translateLabel(language, 'Map'), icon: Navigation },
     ];
   } else {
     // citizen
     tabs = [
-      { path: '/citizen', label: 'Home', icon: Home },
-      { path: '/report', label: 'Report', icon: FileText },
-      { path: '/track', label: 'Track', icon: Map },
-      { path: '/emergency', label: 'Emergency', icon: AlertTriangle },
+      { path: '/citizen', label: translateLabel(language, 'Home'), icon: Home },
+      { path: '/report', label: translateLabel(language, 'Report Issue'), icon: FileText },
+      { path: '/track', label: translateLabel(language, 'Track Reports'), icon: Map },
+      { path: '/emergency', label: translateLabel(language, 'Emergency'), icon: AlertTriangle },
     ];
   }
 

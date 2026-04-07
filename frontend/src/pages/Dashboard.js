@@ -46,7 +46,14 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(apiUrl('/api/dashboard/stats'));
+        let endpoint = '/api/dashboard/stats';
+        if (session?.orgId) {
+            endpoint += `?orgId=${session.orgId}`;
+        } else if (session?.city) {
+            endpoint += `?city=${session.city}`;
+        }
+        
+        const response = await axios.get(apiUrl(endpoint));
         setStats({
           ...emptyStats,
           ...response.data.data,

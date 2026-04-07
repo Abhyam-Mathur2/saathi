@@ -3,9 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { AtSign, Lock, Loader2, LogIn, Copy, Check } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import { loginCitizen } from '../utils/roleAuth';
+import { useLanguage } from '../contexts/LanguageContext';
+import { translateLabel } from '../i18n/translations';
 
 const CitizenLogin = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [copiedField, setCopiedField] = useState(null);
@@ -13,20 +16,19 @@ const CitizenLogin = () => {
   const handleCopy = (text, field) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
-    toast.success('Copied to clipboard!');
+    toast.success(translateLabel(language, 'Copied to clipboard!'));
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      loginCitizen(formData);
-      toast.success('Welcome back!');
+      const session = await loginCitizen(formData);
+      toast.success(`Welcome back, ${session.name}!`);
       navigate('/citizen');
     } catch (error) {
-      toast.error(error.message || 'Citizen login failed.');
+      toast.error(error.message || translateLabel(language, 'Citizen login failed.'));
     } finally {
       setLoading(false);
     }
@@ -40,8 +42,8 @@ const CitizenLogin = () => {
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-emerald-50 text-emerald-600 mb-4">
             <LogIn className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">Citizen Login</h1>
-          <p className="text-slate-500 mt-2 text-sm">Login with your citizen username and password.</p>
+          <h1 className="text-2xl font-bold text-slate-900">{translateLabel(language, 'Citizen Login')}</h1>
+          <p className="text-slate-500 mt-2 text-sm">{translateLabel(language, 'Login with your citizen username and password.')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,7 +52,7 @@ const CitizenLogin = () => {
             <input
               required
               type="text"
-              placeholder="Username"
+              placeholder={translateLabel(language, 'Username')}
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
@@ -62,7 +64,7 @@ const CitizenLogin = () => {
             <input
               required
               type="password"
-              placeholder="Password"
+              placeholder={translateLabel(language, 'Password')}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="h-12 w-full pl-10 rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500"
@@ -75,66 +77,48 @@ const CitizenLogin = () => {
             className="w-full h-12 bg-emerald-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-emerald-700 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
-            Continue as Citizen
+            {translateLabel(language, 'Continue as Citizen')}
           </button>
 
           <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-emerald-900">
-            <p className="font-semibold text-sm mb-3">✅ Demo Citizen Credentials (Auto-seeded):</p>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200">
-                <div>
-                  <p className="text-xs text-emerald-700 font-semibold">Username:</p>
-                  <p className="text-sm font-mono text-slate-900">citizen_demo</p>
-                </div>
+            <p className="font-semibold text-sm mb-2">✅ {translateLabel(language, 'Demo Citizen Accounts:')}</p>
+            <div className="space-y-1">
+              {[
+                { city: 'Delhi', username: 'deepak.delhi' },
+                { city: 'Mumbai', username: 'meera.mumbai' },
+                { city: 'Patna', username: 'suraj.patna' },
+                { city: 'Bangalore', username: 'kavya.blr' },
+                { city: 'Chennai', username: 'lakshmi.chn' },
+              ].map(({ city, username }) => (
                 <button
-                  type="button"
-                  onClick={() => handleCopy('citizen_demo', 'username')}
-                  className="ml-2 p-2 hover:bg-emerald-100 rounded-lg transition"
+                  key={city} type="button"
+                  onClick={() => setFormData({ username, password: 'Citizen@2026' })}
+                  className="w-full text-left bg-white px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-50 transition font-mono text-xs"
                 >
-                  {copiedField === 'username' ? (
-                    <Check className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Copy className="w-4 h-4 text-emerald-600" />
-                  )}
+                  📍 {city}: <span className="text-slate-700">{username}</span>
                 </button>
-              </div>
-              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-200">
-                <div>
-                  <p className="text-xs text-emerald-700 font-semibold">Password:</p>
-                  <p className="text-sm font-mono text-slate-900">Citizen@2026</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleCopy('Citizen@2026', 'cit_password')}
-                  className="ml-2 p-2 hover:bg-emerald-100 rounded-lg transition"
-                >
-                  {copiedField === 'cit_password' ? (
-                    <Check className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Copy className="w-4 h-4 text-emerald-600" />
-                  )}
-                </button>
-              </div>
+              ))}
+              <p className="text-xs text-emerald-700 mt-1">{translateLabel(language, 'Password for all:')} <strong>Citizen@2026</strong></p>
             </div>
           </div>
         </form>
 
         <p className="text-sm text-slate-500 text-center mt-6">
-          New user?{' '}
+          {translateLabel(language, 'New user?')}{' '}
           <Link to="/citizen/signup" className="font-semibold text-emerald-600 hover:text-emerald-700">
-            Create citizen account
+            {translateLabel(language, 'Create citizen account')}
           </Link>
         </p>
 
         <p className="text-sm text-slate-500 text-center mt-3">
-          Need staff access?{' '}
+          {translateLabel(language, 'Need staff access?')}{' '}
           <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-700">
-            Admin / Volunteer login
+            {translateLabel(language, 'Admin / Volunteer login')}
           </Link>
         </p>
 
         <p className="mt-4 text-center text-sm text-slate-500">
-          Want to help too? Open your citizen workspace and register as a volunteer.
+          {translateLabel(language, 'Want to help too? Open your citizen workspace and register as a volunteer.')}
         </p>
       </div>
     </div>

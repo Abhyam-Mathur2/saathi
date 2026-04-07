@@ -4,11 +4,14 @@ import { Heart, LayoutDashboard, FileText, Users, Map, Calendar, LogOut, Home, N
 import { getSession, logoutSession } from '../../utils/roleAuth';
 import { getActiveRole } from '../../utils/roleSwitch';
 import Avatar from '../ui/Avatar';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translateLabel } from '../../i18n/translations';
 
 export default function SideNav() {
   const location = useLocation();
   const session = getSession();
   const role = getActiveRole(session);
+  const { language } = useLanguage();
   const [collapsed, setCollapsed] = useState(false); // Could be toggled
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -27,25 +30,25 @@ export default function SideNav() {
   let navItems = [];
   if (role === 'admin') {
     navItems = [
-      { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-      { path: '/admin/reports', label: 'Reports', icon: FileText },
-      { path: '/admin/volunteers', label: 'Volunteers', icon: Users },
-      { path: '/admin/planner', label: 'Planner', icon: Map },
-      { path: '/admin/events', label: 'Events', icon: Calendar },
+      { path: '/admin', label: translateLabel(language, 'Dashboard'), icon: LayoutDashboard },
+      { path: '/admin/reports', label: translateLabel(language, 'Reports'), icon: FileText },
+      { path: '/admin/volunteers', label: translateLabel(language, 'Volunteers'), icon: Users },
+      { path: '/admin/planner', label: translateLabel(language, 'Planner'), icon: Map },
+      { path: '/admin/events', label: translateLabel(language, 'Events'), icon: Calendar },
     ];
   } else if (role === 'volunteer') {
     navItems = [
-      { path: '/volunteer', label: 'Home', icon: Home },
-      { path: '/volunteer/tasks', label: 'My Tasks', icon: CheckSquare },
-      { path: '/volunteer/reports', label: 'Find Reports', icon: FileText },
-      { path: '/route-planner', label: 'Map', icon: Navigation },
+      { path: '/volunteer', label: translateLabel(language, 'Home'), icon: Home },
+      { path: '/volunteer/tasks', label: translateLabel(language, 'My Tasks'), icon: CheckSquare },
+      { path: '/volunteer/reports', label: translateLabel(language, 'Find Reports'), icon: FileText },
+      { path: '/route-planner', label: translateLabel(language, 'Map'), icon: Navigation },
     ];
   } else {
     navItems = [
-      { path: '/citizen', label: 'Home', icon: Home },
-      { path: '/report', label: 'Report Issue', icon: FileText },
-      { path: '/track', label: 'Track Reports', icon: Map },
-      { path: '/emergency', label: 'Emergency', icon: AlertTriangle },
+      { path: '/citizen', label: translateLabel(language, 'Home'), icon: Home },
+      { path: '/report', label: translateLabel(language, 'Report Issue'), icon: FileText },
+      { path: '/track', label: translateLabel(language, 'Track Reports'), icon: Map },
+      { path: '/emergency', label: translateLabel(language, 'Emergency'), icon: AlertTriangle },
     ];
   }
 
@@ -73,13 +76,13 @@ export default function SideNav() {
             <Heart className="w-8 h-8 text-accent-400 fill-current" />
             {!collapsed && (
               <span className="ml-3 font-heading font-bold text-2xl tracking-tight text-white">
-                Saathi
+                {translateLabel(language, 'Saathi')}
               </span>
             )}
           </Link>
           {!collapsed && (
             <div className="mt-4 px-3 py-1 bg-primary-800 rounded-full text-xs font-semibold text-accent-300 uppercase tracking-wider text-center">
-              {role} Portal
+              {role} {translateLabel(language, 'Dashboard')}
             </div>
           )}
         </div>
@@ -115,12 +118,12 @@ export default function SideNav() {
                 <span className="text-xs text-primary-300 truncate capitalize">{role}</span>
               </div>
             </div>
-            <button onClick={handleLogout} className="p-2 text-primary-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+            <button onClick={handleLogout} className="p-2 text-primary-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title={translateLabel(language, 'Logout')}>
               <LogOut className="w-5 h-5" />
             </button>
           </div>
         ) : (
-          <button onClick={handleLogout} className="w-full p-2 flex justify-center text-primary-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Logout">
+          <button onClick={handleLogout} className="w-full p-2 flex justify-center text-primary-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title={translateLabel(language, 'Logout')}>
             <LogOut className="w-5 h-5" />
           </button>
         )}

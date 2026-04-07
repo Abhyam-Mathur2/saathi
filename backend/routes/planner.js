@@ -6,16 +6,25 @@ let latestPlan = null;
 
 router.post('/run', async (req, res) => {
     try {
-        const plan = await autoPlanner.runAutoPlanner();
-        latestPlan = plan;
+        const { orgId } = req.body;
+        // Run AI to assign unassigned tasks
+        await autoPlanner.runAutoPlanner(orgId);
+        // Return global live output including old and new assignments
+        const plan = await autoPlanner.generateLiveDashboard(orgId);
         res.json({ success: true, data: plan });
     } catch (e) {
         res.status(500).json({ success: false, message: e.message });
     }
 });
 
-router.get('/latest', (req, res) => {
-    res.json({ success: true, data: latestPlan });
+router.get('/latest', async (req, res) => {
+    try {
+        const orgId = req.query.orgId || '';
+        const plan = await autoPlanner.generateLiveDashboard(orgId);
+        res.json({ success: true, data: plan });
+    } catch(e) {
+        res.status(500).json({ success: false, message: e.message });
+    }
 });
 
 router.get('/volunteer/:id', async (req, res) => {

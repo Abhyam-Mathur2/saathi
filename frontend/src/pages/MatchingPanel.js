@@ -5,17 +5,21 @@ import { User, MapPin, Award, Calendar, ChevronLeft, CheckCircle, ShieldCheck, M
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
+import { getSession } from '../utils/roleAuth';
 
 const MatchingPanel = () => {
   const { reportId } = useParams();
+  const session = getSession();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendingTo, setSendingTo] = useState('');
+  const [assigning, setAssigning] = useState('');
 
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const response = await axios.get(apiUrl(`/api/reports/match/${reportId}`));
+        const orgParam = session?.orgId ? `?orgId=${session.orgId}` : '';
+        const response = await axios.get(apiUrl(`/api/reports/match/${reportId}${orgParam}`));
         setMatches(response.data.data);
       } catch (error) {
         console.error('Error fetching matches:', error);
@@ -26,10 +30,26 @@ const MatchingPanel = () => {
     fetchMatches();
   }, [reportId]);
 
-  const handleAssign = (volunteerName) => {
-    toast.success(`Assignment simulated! Alert sent to ${volunteerName}`);
-    console.log(`Alert sent to ${volunteerName}: Urgent task assigned.`);
+  const handleAssign = async (volunteer) => {
+    setAssigning(volunteer._id);
+    try {
+      const res = await axios.put(apiUrl(`/api/reports/${reportId}/assign`), {
+        volunteerId: volunteer._id,
+        adminId: session?.id,
+        orgId: session?.orgId
+      });
+      if (res.data.success) {
+        toast.success(`✅ ${volunteer.name} assigned! Task sent.`);
+      } else {
+        toast.error(res.data.message || 'Assignment failed');
+      }
+    } catch (e) {
+      toast.error('Failed to assign volunteer.');
+    } finally {
+      setAssigning('');
+    }
   };
+
 
   const handleSendMessage = async (volunteer) => {
     try {
@@ -138,11 +158,12 @@ const MatchingPanel = () => {
 
                 <div className="space-y-2">
                   <button 
-                    onClick={() => handleAssign(match.volunteer.name)}
-                    className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${index === 0 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md shadow-primary-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
+                    onClick={() => handleAssign(match.volunteer)}
+                    disabled={assigning === match.volunteer._id}
+                    className={`w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${index === 0 ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-md shadow-primary-100' : 'bg-slate-900 text-white hover:bg-slate-800'} disabled:opacity-50`}
                   >
                     <CheckCircle className="w-4 h-4" />
-                    Assign Task
+                    {assigning === match.volunteer._id ? 'Assigning...' : 'Assign Task'}
                   </button>
                   <button
                     type="button"

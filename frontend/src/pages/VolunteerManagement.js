@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { User, Phone, MapPin, Trash2, Search, Loader2, MessageCircle } from 'lucide-react';
+import { User, Phone, MapPin, Trash2, Search, Loader2, MessageCircle, Activity } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { apiUrl } from '../config/api';
+import { getSession } from '../utils/roleAuth';
+import VolunteerActivityDrawer from '../components/activity/VolunteerActivityDrawer';
 
 const VolunteerManagement = () => {
+  const session = getSession();
   const [volunteers, setVolunteers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sendingTo, setSendingTo] = useState('');
+  const [selectedVolunteer, setSelectedVolunteer] = useState(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   useEffect(() => {
     fetchVolunteers();
   }, []);
 
+  const openActivityDrawer = (volunteer) => {
+    setSelectedVolunteer(volunteer);
+    setIsDrawerOpen(true);
+  };
+
   const fetchVolunteers = async () => {
     try {
-      const response = await axios.get(apiUrl('/api/volunteers'));
+      const orgParam = session?.orgId ? `?orgId=${session.orgId}` : '';
+      const response = await axios.get(apiUrl(`/api/volunteers${orgParam}`));
       setVolunteers(response.data.data);
     } catch (error) {
       toast.error('Failed to fetch volunteers');
@@ -143,11 +154,23 @@ const VolunteerManagement = () => {
             
             <div className="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-between items-center">
               <span className="text-[10px] text-slate-400">Joined {new Date(volunteer.createdAt).toLocaleDateString()}</span>
-              <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Active</span>
+              <button
+                onClick={() => openActivityDrawer(volunteer)}
+                className="flex items-center gap-1.5 text-[10px] text-primary-600 font-bold px-3 py-1.5 rounded-full bg-primary-50 hover:bg-primary-100 transition-colors"
+              >
+                <Activity size={12} />
+                Activity
+              </button>
             </div>
           </div>
         ))}
       </div>
+
+      <VolunteerActivityDrawer 
+        volunteer={selectedVolunteer}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+      />
 
       {filteredVolunteers.length === 0 && (
         <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">

@@ -15,6 +15,13 @@ export default function RoleToggle({ session }) {
   }, [session]);
 
   const handleToggle = () => {
+    if (!canSwitch && role === 'citizen') {
+        // Zomato style opt-in: Redirect to volunteer login so they can sync credentials
+        toast('Sync your Volunteer credentials to switch modes!', { icon: '👏' });
+        window.location.href = '/volunteer/login';
+        return;
+    }
+    
     toggleRole(session);
     const newRole = getActiveRole(session);
     setRole(newRole);
@@ -23,8 +30,6 @@ export default function RoleToggle({ session }) {
       window.location.href = newRole === 'volunteer' ? '/volunteer' : '/citizen';
     }, 500);
   };
-
-  if (!canSwitch) return null;
 
   const isVolunteer = role === 'volunteer';
 

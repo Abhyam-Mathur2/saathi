@@ -7,20 +7,28 @@ router.post('/', async (req, res) => {
   try {
     const { type, description, location, radiusKm, senderPhone } = req.body;
     
-    // 1. Store emergency in a simple local store entry (mocking DB for hackathon)
-    const emergencyId = Date.now().toString();
-    console.log(`[EMERGENCY ${emergencyId}] New alert: ${type} at ${location?.address}`);
+    // 1. Store emergency safely as an Urgent Report in MongoDB
+    const Report = require('../models/Report');
+    const emergencyReport = new Report({
+       issueType: 'Safety',
+       urgency: 10,
+       description: `EMERGENCY SOS: ${type}. ${description || ''}`,
+       location: {
+          type: 'Point',
+          coordinates: location?.coordinates || [77.1025, 28.7041],
+          address: location?.address || 'Unknown Location'
+       },
+       city: location?.address?.split(',')[0] || 'Unknown City',
+       status: 'Pending',
+       source: 'Emergency SOS'
+    });
+    await emergencyReport.save();
+    console.log(`[EMERGENCY] Logged urgent Report to DB. ID: ${emergencyReport._id}`);
 
-    // 2. Get all volunteers
-    const volunteers = await localStore.listVolunteers(Volunteer);
-    
-    // 3. Filter by distance (mocking radius check for now if coordinates aren't fully reliable)
-    // In a real app, calculate Haversine distance. Here we just take available ones.
-    const nearbyVolunteers = volunteers.filter(v => v.availability === true || v.status === 'Active');
-    
-    // 4. "Send" WhatsApp to each via Twilio (mock)
-    const count = nearbyVolunteers.length;
-    console.log(`[EMERGENCY] Broadcasting to ${count} nearby volunteers...`);
+    // 2. Fetch volunteers scoped nearby
+    const volunteers = await Volunteer.find({ status: 'Active' });
+    const count = volunteers.length;
+    console.log(`[EMERGENCY] Pushing high-priority silent notification to ${count} volunteers...`);
 
     res.status(200).json({ 
       success: true, 

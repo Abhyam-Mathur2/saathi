@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, MapPin, CheckCircle2, ChevronRight, ChevronLeft, Mic, MicOff, Upload, Send, FileText, Loader2, LocateFixed, Sparkles } from 'lucide-react';
+import { Camera, MapPin, Loader2, Sparkles, AlertCircle, LocateFixed, Mic, ChevronLeft, ChevronRight } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/ui/PageHeader';
 import Button from '../components/ui/Button';
+import { apiUrl } from '../config/api';
 
 export default function ReportSubmission() {
   const navigate = useNavigate();
@@ -24,6 +25,32 @@ export default function ReportSubmission() {
     description: '',
     aiUsed: false
   });
+
+  const ISSUE_TYPES = ['Food', 'Health', 'Education', 'Infrastructure', 'Safety', 'Environment', 'Other'];
+
+  const isLikelyUsefulText = (text) => {
+    const t = String(text || '').trim();
+    if (!t || t.length < 20) return false;
+    const words = t.split(/\s+/);
+    if (words.length < 4) return false;
+    const alphaChars = (t.match(/[A-Za-z]/g) || []).length;
+    const alphaRatio = alphaChars / t.length;
+    const weirdChars = (t.match(/[~`^_|\\]/g) || []).length;
+    const weirdRatio = weirdChars / t.length;
+    return alphaRatio > 0.55 && weirdRatio < 0.08;
+  };
+
+  const normalizeIssueType = (value, text = '') => {
+    const raw = String(value || '').toLowerCase().trim();
+    const combined = `${raw} ${String(text || '').toLowerCase()}`;
+    if (combined.includes('education') || combined.includes('school') || combined.includes('student') || combined.includes('classroom')) return 'Education';
+    if (combined.includes('infrastructure') || combined.includes('road') || combined.includes('pothole') || combined.includes('bridge') || combined.includes('drain') || combined.includes('waterlogging')) return 'Infrastructure';
+    if (combined.includes('health') || combined.includes('medical') || combined.includes('dengue') || combined.includes('hospital') || combined.includes('clinic')) return 'Health';
+    if (combined.includes('food') || combined.includes('ration') || combined.includes('hunger') || combined.includes('meal') || combined.includes('kitchen')) return 'Food';
+    if (combined.includes('safety') || combined.includes('unsafe') || combined.includes('accident') || combined.includes('evacuation') || combined.includes('crowd')) return 'Safety';
+    if (combined.includes('environment') || combined.includes('garbage') || combined.includes('waste') || combined.includes('pollution') || combined.includes('sewage') || combined.includes('tree')) return 'Environment';
+    return ISSUE_TYPES.includes(value) ? value : 'Other';
+  };
 
   const nextStep = () => setStep(s => Math.min(3, s + 1));
   const prevStep = () => setStep(s => Math.max(1, s - 1));
@@ -69,36 +96,78 @@ export default function ReportSubmission() {
       const base64 = imageReader.result;
       setFormData(prev => ({ ...prev, reportImage: base64 }));
       
-      // Analyze with AI and OCR concurrently
+      // Analyze with vision + OCR (tolerant relevance filter)
       setAiAnalyzing(true);
       try {
-        const [ocrResult, aiResult] = await Promise.all([
-          Tesseract.recognize(file, 'eng'),
-          fetch('/api/reports/analyze-image', {
+        let ai = {};
+        try {
+          const aiRes = await fetch(apiUrl('/api/reports/analyze-image'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ imageBase64: base64 })
-          }).then(r => r.json())
-        ]);
+          });
+          const aiData = await aiRes.json();
+          if (aiData?.success) ai = aiData.data || {};
+        } catch (err) {
+          console.error('Vision analysis failed:', err);
+        }
 
-        const ocrText = ocrResult.data.text?.trim();
-        const aiData = aiResult.data || {};
+        let ocrText = '';
+        const relevanceScore = Number(ai?.relevanceScore ?? 50);
+        const aiRelevant = ai?.isRelevant !== false;
+        const isClearlyIrrelevant = !aiRelevant && relevanceScore < 25 && ocrText.length < 12;
+
+        const aiDescription = String(ai?.description || ai?.aiSummary || ai?.relevanceReason || '').trim();
+        const looksLikeErrorText = /failed|decommissioned|not supported|error|unavailable|vision ai/i.test(aiDescription);
+        const safeAIDescription = looksLikeErrorText ? '' : aiDescription;
+
+        // OCR is used only as fallback when AI doesn't provide a usable summary.
+        if (!safeAIDescription) {
+          const ocrResult = await Tesseract.recognize(file, 'eng').catch(err => {
+            console.error('OCR Failed:', err);
+            return { data: { text: '' } };
+          });
+          const rawOCR = ocrResult?.data?.text?.trim() || '';
+          ocrText = isLikelyUsefulText(rawOCR) ? rawOCR : '';
+        }
+
+        const finalIsClearlyIrrelevant = !aiRelevant && relevanceScore < 25 && !safeAIDescription && !ocrText;
+
+        if (finalIsClearlyIrrelevant) {
+          setFormData(prev => ({ ...prev, reportImage: '' }));
+          toast.error('This image looks unrelated to a civic issue. Please upload a clearer issue photo.');
+          return;
+        }
+
+        if ((!aiRelevant && relevanceScore < 45) || (aiRelevant && relevanceScore < 40)) {
+          toast('Image is accepted, but please verify description and category.', { icon: '⚠️' });
+        }
+
+        const suggestedType = normalizeIssueType(ai?.issueType, `${ai?.description || ''} ${ai?.aiSummary || ''} ${ocrText}`);
+        const suggestedUrgency = Math.min(10, Math.max(1, Number(ai?.urgency || 5)));
+
+        const inferredDescription = suggestedType === 'Other'
+          ? safeAIDescription
+          : safeAIDescription || `Detected a ${suggestedType.toLowerCase()} issue from the uploaded image.`;
+
+        const newDesc = [inferredDescription, ocrText, formData.description]
+          .filter(Boolean)[0] || '';
 
         setFormData(prev => ({
           ...prev,
-          issueType: aiData.issueType || prev.issueType,
-          urgency: aiData.urgency || prev.urgency,
-          description: (aiData.description || ocrText || prev.description) + (aiData.aiSummary ? `\n\nAI Note: ${aiData.aiSummary}` : ''),
-          aiUsed: true
+          issueType: suggestedType,
+          urgency: suggestedUrgency,
+          description: newDesc,
+          aiUsed: !!ocrText || !!ai?.description || !!ai?.aiSummary
         }));
         
-        toast.success('Image analyzed successfully!');
+        toast.success('Image analyzed. Category and details auto-filled.');
         // Auto advance to next step if analyzing from step 1
         if (step === 1) nextStep();
         
       } catch (error) {
         console.error('Analysis failed:', error);
-        toast.error('Could not analyze image.');
+        toast.error('Could not process image.');
       } finally {
         setAiAnalyzing(false);
       }
@@ -135,7 +204,7 @@ export default function ReportSubmission() {
 
     setLoading(true);
     try {
-      const res = await fetch('/api/reports', {
+      const res = await fetch(apiUrl('/api/reports'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

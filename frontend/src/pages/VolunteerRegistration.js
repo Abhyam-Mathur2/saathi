@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { User, Phone, Mail, MapPin, CheckCircle2, Loader2, Camera, X, LocateFixed, Lock } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 import ChatbotWidget from '../components/ChatbotWidget';
 import { signupVolunteer } from '../utils/volunteerAuth';
-import { apiUrl } from '../config/api';
 
 const VolunteerRegistration = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [locating, setLocating] = useState(false);
   const [locationAccuracy, setLocationAccuracy] = useState(null);
@@ -136,42 +136,39 @@ const VolunteerRegistration = () => {
 
     setLoading(true);
     try {
-      signupVolunteer({
+      await signupVolunteer({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-      });
-
-      const { password, confirmPassword, ...volunteerProfile } = formData;
-      const payload = {
-        ...volunteerProfile,
+        skills: formData.skills,
+        city: formData.address,          // use address field as city identifier
         location: {
+          type: 'Point',
           coordinates: [formData.longitude, formData.latitude],
           address: formData.address
-        }
-      };
-      await axios.post(apiUrl('/api/volunteers'), payload);
-      toast.success('Registration successful! You can now log in as volunteer.');
+        },
+        availability: formData.availability,
+        profileImage: formData.profileImage || '',
+        orgId: null                       // independent volunteer
+      });
+
+      toast.success('Registration successful! You can now log in.');
       setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        skills: [],
-        address: '',
-        longitude: 77.1025,
-        latitude: 28.7041,
+        name: '', phone: '', email: '', password: '', confirmPassword: '',
+        skills: [], address: '', longitude: 77.1025, latitude: 28.7041,
+        profileImage: '',
         availability: { days: [], times: ['Morning'] }
       });
       setPhotoPreview(null);
+      navigate('/volunteer/login');
     } catch (error) {
-      toast.error(error?.message || error?.response?.data?.message || 'Registration failed.');
+      toast.error(error?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

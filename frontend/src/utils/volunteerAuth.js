@@ -1,95 +1,56 @@
-const USERS_KEY = 'saathi.users';
-const LEGACY_USERS_KEY = 'volunteerIQ.users';
-const SESSION_KEY = 'saathi.session';
-const LEGACY_SESSION_KEY = 'volunteerIQ.session';
+/**
+ * volunteerAuth.js — Volunteer auth backed by MongoDB API
+ */
 
-function readUsers() {
-  const raw = localStorage.getItem(USERS_KEY) || localStorage.getItem(LEGACY_USERS_KEY);
-  return raw ? JSON.parse(raw) : [];
+const SESSION_KEY = 'saathi.activeSession';
+const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
+export async function loginVolunteer({ email, password }) {
+    const res = await fetch(`${API_BASE}/auth/volunteer/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Login failed.');
+
+    const session = {
+        role: 'volunteer',
+        id: data.data.id,
+        name: data.data.name,
+        email: data.data.email,
+        phone: data.data.phone,
+        city: data.data.city,
+        state: data.data.state,
+        orgId: data.data.orgId || null,
+        orgName: data.data.orgName || null,
+        ngoName: data.data.orgName || '',
+        skills: data.data.skills || [],
+        loginAt: new Date().toISOString()
+    };
+
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    window.dispatchEvent(new Event('role-auth-changed'));
+    return session;
 }
 
-function writeUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+export async function signupVolunteer({ name, email, phone, password, orgId, skills, city, state, location, availability, profileImage }) {
+    const res = await fetch(`${API_BASE}/auth/volunteer/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, password, orgId, skills, city, state, location, availability, profileImage })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Registration failed.');
+    return data.data;
 }
 
 export function getSession() {
-  const raw = localStorage.getItem(SESSION_KEY) || localStorage.getItem(LEGACY_SESSION_KEY);
-  return raw ? JSON.parse(raw) : null;
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
 }
 
 export function logoutVolunteer() {
-  localStorage.removeItem(SESSION_KEY);
-  window.dispatchEvent(new Event('volunteer-auth-changed'));
-}
-
-export function signupVolunteer({ name, email, phone, password }) {
-  const normalizedEmail = email.trim().toLowerCase();
-  const users = readUsers();
-
-  const existing = users.find((user) => user.email === normalizedEmail);
-  if (existing) {
-    throw new Error('An account with this email already exists.');
-  }
-
-  const newUser = {
-    id: crypto.randomUUID(),
-    name: name.trim(),
-    email: normalizedEmail,
-    phone: phone.trim(),
-    password,
-    createdAt: new Date().toISOString(),
-  };
-
-  users.push(newUser);
-  writeUsers(users);
-
-  return { id: newUser.id, name: newUser.name, email: newUser.email, phone: newUser.phone };
-}
-
-export function loginVolunteer({ email, password }) {
-  const normalizedEmail = email.trim().toLowerCase();
-
-  // Check hardcoded demo volunteer accounts first (fallback for demo data)
-  const demoVolunteers = [
-    { email: 'john@saathi.com', password: 'Volunteer@2026', name: 'John Doe', phone: '9876543210' },
-    { email: 'sarah@saathi.com', password: 'Volunteer@2026', name: 'Sarah Smith', phone: '9876543211' },
-    { email: 'raj@saathi.com', password: 'Volunteer@2026', name: 'Raj Kumar', phone: '9876543212' },
-  ];
-
-  const demoMatch = demoVolunteers.find(
-    (demo) => demo.email === normalizedEmail && demo.password === password
-  );
-
-  if (demoMatch) {
-    const session = {
-      id: `demo-volunteer-${Date.now()}`,
-      name: demoMatch.name,
-      email: demoMatch.email,
-      phone: demoMatch.phone,
-      loginAt: new Date().toISOString(),
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    window.dispatchEvent(new Event('volunteer-auth-changed'));
-    return session;
-  }
-
-  // Then check localStorage for registered volunteers
-  const users = readUsers();
-
-  const user = users.find((u) => u.email === normalizedEmail && u.password === password);
-  if (!user) {
-    throw new Error('Invalid email or password.');
-  }
-
-  const session = {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    loginAt: new Date().toISOString(),
-  };
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  window.dispatchEvent(new Event('volunteer-auth-changed'));
-  return session;
+    localStorage.removeItem(SESSION_KEY);
+    window.dispatchEvent(new Event('role-auth-changed'));
 }

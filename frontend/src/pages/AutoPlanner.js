@@ -4,16 +4,21 @@ import { apiUrl } from '../config/api';
 import PlanSummary from '../components/PlanSummary';
 import { Loader2, Wand2, FileDown, Navigation } from 'lucide-react';
 import { jsPDF } from 'jspdf';
+import { getSession } from '../utils/roleAuth';
+
 
 const AutoPlanner = () => {
     const [plan, setPlan] = useState(null);
     const [loading, setLoading] = useState(false);
     const [loadingMsg, setLoadingMsg] = useState('');
 
+    const session = getSession();
+
     useEffect(() => {
         const fetchLatest = async () => {
             try {
-                const res = await axios.get(apiUrl('/api/planner/latest'));
+                const url = session?.orgId ? `/api/planner/latest?orgId=${session.orgId}` : `/api/planner/latest`;
+                const res = await axios.get(apiUrl(url));
                 if (res.data.data) setPlan(res.data.data);
             } catch(e) {}
         };
@@ -24,7 +29,7 @@ const AutoPlanner = () => {
         setLoading(true);
         setLoadingMsg('🤖 AI is analyzing tasks and volunteers...');
         try {
-            const res = await axios.post(apiUrl('/api/planner/run'));
+            const res = await axios.post(apiUrl('/api/planner/run'), { orgId: session?.orgId });
             setPlan(res.data.data);
         } catch(e) {
             console.error(e);
@@ -32,6 +37,7 @@ const AutoPlanner = () => {
             setLoading(false);
         }
     };
+
 
     const exportPDF = () => {
         if (!plan) return;

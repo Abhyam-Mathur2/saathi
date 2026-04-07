@@ -4,6 +4,7 @@ import { Bot, FileText, LocateFixed, MessageCircle, Phone, HeartHandshake, Arrow
 import { toast } from 'react-hot-toast';
 import ReportSubmission from './ReportSubmission';
 import ChatbotWidget from '../components/ChatbotWidget';
+import RoleToggle from '../components/RoleToggle';
 import { getSession } from '../utils/roleAuth';
 import { apiUrl } from '../config/api';
 import { useNavigate } from 'react-router-dom';
@@ -87,6 +88,8 @@ const CitizenPortal = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 space-y-10">
+      <RoleToggle session={session} />
+      
       {/* Header Section */}
       <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>

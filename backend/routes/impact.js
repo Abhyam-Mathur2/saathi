@@ -1,12 +1,47 @@
 const express = require('express');
 const router = express.Router();
-const ImpactZone = require('../models/ImpactZone');
+const Report = require('../models/Report');
 const groqService = require('../services/groqService');
 const axios = require('axios');
 
+// Build heatmap zones from real reports, filtered by city
 router.get('/heatmap', async (req, res) => {
     try {
-        const zones = await ImpactZone.find({});
+        const { city } = req.query;
+        const query = { status: { $nin: ['Resolved'] } };
+        if (city) query.city = { $regex: new RegExp(city, 'i') };
+
+        const reports = await Report.find(query).lean();
+
+        // Group reports by city to create zones
+        const cityMap = {};
+        for (const r of reports) {
+            const key = r.city || r.location?.address || 'Unknown';
+            if (!cityMap[key]) {
+                cityMap[key] = {
+                    zoneId: key.replace(/\s+/g, '-').toLowerCase(),
+                    placeName: key,
+                    lat: r.location?.coordinates?.[1] || 20,
+                    lng: r.location?.coordinates?.[0] || 77,
+                    reports: [],
+                    crisisType: r.issueType || 'General',
+                    affectedPopulation: 0,
+                    weatherSeverity: 3
+                };
+            }
+            cityMap[key].reports.push(r);
+            cityMap[key].affectedPopulation += 100;
+        }
+
+        const zones = Object.values(cityMap).map(z => ({
+            ...z,
+            currentUrgency: Math.min(10, Math.round(
+                z.reports.reduce((sum, r) => sum + (r.urgency || 5), 0) / z.reports.length
+            )),
+            activeReports: z.reports.length,
+            crisisType: z.reports.sort((a, b) => (b.urgency || 0) - (a.urgency || 0))[0]?.issueType || 'General',
+        }));
+
         res.json({ success: true, data: zones });
     } catch (e) {
         res.status(500).json({ success: false, message: e.message });

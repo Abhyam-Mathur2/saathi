@@ -6,6 +6,7 @@ import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
+import { apiUrl } from '../config/api';
 
 export default function AdminEvents() {
   const [events, setEvents] = useState([]);
@@ -21,7 +22,7 @@ export default function AdminEvents() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch('/api/events');
+      const res = await fetch(apiUrl('/api/events'));
       const data = await res.json();
       setEvents(data);
     } catch (e) {
@@ -34,7 +35,7 @@ export default function AdminEvents() {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await fetch('/api/events', {
+      await fetch(apiUrl('/api/events'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, location: { address: formData.address } })
@@ -49,7 +50,7 @@ export default function AdminEvents() {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`/api/events/${id}`, { method: 'DELETE' });
+      await fetch(apiUrl(`/api/events/${id}`), { method: 'DELETE' });
       fetchEvents();
     } catch (e) {
       console.error(e);
